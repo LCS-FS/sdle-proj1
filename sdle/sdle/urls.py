@@ -17,7 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from sdle_app import views
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("", include("sdle_app.urls")),
+    path("", views.index, name="index"),
+    path("login/", views.login, name="login")
 ]
