@@ -1,5 +1,6 @@
 function copyHash(hash){
-    navigator.clipboard.writeText(hash);
-    const button = document.querySelector("#shareHash"+hash)
+    console.log(hash)
+    navigator.clipboard.writeText(String(hash));
+    const button = document.querySelector("#shareHash"+String(hash))
     button.innerHTML = 'Copied'
 }

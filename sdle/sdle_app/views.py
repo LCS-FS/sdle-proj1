@@ -1,15 +1,21 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.contrib.auth import authenticate, login, logout
+import random
+from .models import List
 # Create your views here.
 
 def index(request):
-    lists = [
-            {'hash': 1, 'title': 'list1'},
-            {'hash': 2, 'title': 'list2'},
-            {'hash': 3, 'title': 'list3'},
-            ]
+    lists = List.objects.all()
     return render(request, 'index.html', {'lists': lists})
+
+def createList(request):
+    if(request.method != 'POST'):
+        return redirect('index')
+    hash = str(random.getrandbits(128))
+    l = List(hash= hash, title=request.POST['title'])
+    l.save()
+    return redirect('index')
 
 # def login_view(request):
 #     if (request.user.is_authenticated):
