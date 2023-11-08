@@ -2,11 +2,12 @@
 
 {% block page %}
 
+
 <div class="text-center">
     <h1 class="mb-5 mt-5">Available Lists</h1>
     <div class="d-flex align-items-center justify-content-center">
         <div class="w-75">
-            <form id="connectListForm" method="POST" action="" class="d-flex justify-content-between">
+            <form id="connectListForm" method="POST" action="/connectList" class="d-flex justify-content-between">
                 {% csrf_token %}
                 <h3 class="w-25 border-0 mb-2 rounded" style="background-color: #f4f6f7;">Hash:</h3>
                 <input type="text" name="hash" required class="w-50"></input>
