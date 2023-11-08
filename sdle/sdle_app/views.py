@@ -34,6 +34,14 @@ def connectList(request):
     # TODO: redirect to index if list not found
     return redirect('listPage', hash)
 
+def removeList(request, hash):
+    try:
+        l = List.objects.get(hash=hash)
+        l.delete()
+    except:
+        pass
+    return redirect('index')
+
 def listPage(request, hash):
     l = List.objects.get(hash=hash)
     # TODO: get correct items from database

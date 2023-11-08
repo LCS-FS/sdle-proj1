@@ -22,7 +22,6 @@ if(url.includes("list")){
       });
 }
 
-
 function copyHash(hash){
     console.log(hash)
     navigator.clipboard.writeText(String(hash));

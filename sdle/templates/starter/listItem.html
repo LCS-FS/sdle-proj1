@@ -1,4 +1,7 @@
 <div id="{{ list.hash }}" class="d-flex justify-content-between w-100">
     <a href="list/{{list.hash}}">{{list.title}}</a>
-    <button id="shareHash{{list.hash}}" onclick='copyHash("{{list.hash}}")'>Share</button>
+    <div>
+        <button id="removeHash{{list.hash}}" onclick='location.href = "remove/{{list.hash}}"' >Remove</button>
+        <button id="shareHash{{list.hash}}" onclick='copyHash("{{list.hash}}")'>Share</button>
+    </div>
 </div>
