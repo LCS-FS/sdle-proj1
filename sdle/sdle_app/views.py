@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.contrib.auth import authenticate, login, logout
 import random
-from .models import List
+from .models import List, ItemOp
 # Create your views here.
 
 def index(request):
@@ -44,13 +44,24 @@ def removeList(request, hash):
 
 def listPage(request, hash):
     l = List.objects.get(hash=hash)
-    # TODO: get correct items from database
-    items = [
-            {'id': 1, 'title':'item1', 'count': 3},
-            {'id': 2, 'title':'item2', 'count': 1},
-            {'id': 3, 'title':'item3', 'count': 5},
-        ]
     
+    try:
+        items = ItemOp.objects.get(list=l)
+        itemMap = {}
+        titleMap = {}
+        for item in items:
+            if not item.hash in titleMap:
+                titleMap[item.hash] = item.title
+            if item.type == 'Add':
+                itemMap[item.hash] += item.count
+            else:
+                itemMap[item.hash] -= item.count
+
+        itemList = []
+        for hash, cnt in itemMap.items():
+            itemList.append({'hash':hash, 'cnt':cnt, 'title':titleMap[hash]})
+    except:
+        items = []
     #TODO: On page load, request updated items from server 
     # using javascript
     # perhaps use pub/sub strategy with pusher
