@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect, JsonResponse
 from django.contrib.auth import authenticate, login, logout
@@ -49,22 +50,18 @@ def listPage(request, hash):
     itemMap = {}
     titleMap = {}
     for item in items:
-        print(item.count)
-        if not item.hash in titleMap:
-            titleMap[item.hash] = item.title
-        if not item.hash in itemMap:
-            itemMap[item.hash] = item.count
+        if not item.title in itemMap:
+            itemMap[item.title] = item.count
         elif item.type == 'Add':
-            itemMap[item.hash] += item.count
+            itemMap[item.title] += item.count
         else:
-            itemMap[item.hash] -= item.count
+            itemMap[item.title] -= item.count
 
 
     itemList = []
-    for hash, cnt in itemMap.items():
-        itemList.append({'hash':hash, 'cnt':cnt, 'title':titleMap[hash]})
+    for title, cnt in itemMap.items():
+        itemList.append({'cnt':cnt, 'title':title})
 
-    print(itemList)
     #TODO: On page load, request updated items from server 
     # using javascript
     # perhaps use pub/sub strategy with pusher
@@ -84,4 +81,39 @@ def newItem(request):
     itemOp.save()
 
     return redirect("listPage", listHash)
+
+def updateItem(request, title):
+    if(request.method != 'POST'):
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    body_unicode = request.body.decode('utf-8')
+    data = json.loads(body_unicode)
+    
+    count = data['count']
+    print(count)
+    #get previous op
+    prevOp = ItemOp.objects.filter(title=title).last()
+    l = List.objects.get(hash=prevOp.list.hash)
+
+    #get all previous ops
+    opsList = ItemOp.objects.all().filter(title=title)
+    originalCnt = 0
+
+    for op in opsList:
+        if op.type == 'Add':
+            originalCnt += op.count
+        else:
+            originalCnt -= op.count
+    
+    newCount = int(count) - originalCnt
+    print(newCount)
+    if newCount == 0: return JsonResponse({"error": "No changes", "count": originalCnt}, status=400)
+    opType = 'Add'
+    if newCount < 0:
+        opType = 'Rem'
+        newCount = -newCount
+
+    itemOp = ItemOp(list=l, hash=str(random.getrandbits(128)), title=title, type=opType, count=newCount)
+    itemOp.save()
+
+    return JsonResponse({}, status=200)
 

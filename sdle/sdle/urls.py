@@ -26,5 +26,6 @@ urlpatterns = [
     path("connectList", views.connectList, name="connectList"),
     path("list/<str:hash>", views.listPage, name="listPage"),
     path("remove/<str:hash>", views.removeList, name="removeList"),
-    path("newItem", views.newItem, name="newItem")
+    path("newItem", views.newItem, name="newItem"),
+    path("updateItem/<str:title>", views.updateItem, name="updateItem"),
 ]

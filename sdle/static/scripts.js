@@ -2,8 +2,33 @@ url = window.location.href;
 if(url.includes("list")){
     arrows = document.querySelectorAll(".cnt")
     arrows.forEach(element => {
-        element.addEventListener("keydown", e => e.keyCode != 38 && e.keyCode != 40 && e.preventDefault())
+        element.addEventListener("keydown", isNumber)
         element.addEventListener("input", function(){
+            if(element.value === "") return
+
+            //send backend post request to have new op
+            const formData = {
+                csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
+                "count":element.value
+            }
+
+            $.ajax({
+                data:JSON.stringify(formData),
+                type:"POST",
+                url:"/updateItem/"+element.id.split('_')[1],
+                
+                headers:{
+                    'X-CSRFToken': formData.csrfmiddlewaretoken
+                },
+
+                success: function (response) {},
+                
+                error: function(response, status, error){
+                    alert(response)
+                    window.location.reload()
+                }
+            });
+
             if(parseInt(element.value)===0){
                 const grandParent = element.parentNode.parentNode
                 console.log("remove: ", grandParent.parentNode.removeChild(grandParent))
@@ -20,6 +45,15 @@ if(url.includes("list")){
           window.location.reload(true);
         }
       });
+}
+
+function isNumber(evt){
+    var charCode = (evt.which) ? evt.which : evt.keyCode;
+    if (charCode == 46 || charCode > 31 && (charCode < 48 || charCode > 57)){
+        evt.preventDefault();
+        return false;
+    }
+    return true;
 }
 
 function copyHash(hash){
