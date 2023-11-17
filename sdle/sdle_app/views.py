@@ -60,7 +60,8 @@ def listPage(request, hash):
 
     itemList = []
     for title, cnt in itemMap.items():
-        itemList.append({'cnt':cnt, 'title':title})
+        if cnt != 0:
+            itemList.append({'cnt':cnt, 'title':title})
 
     #TODO: On page load, request updated items from server 
     # using javascript
