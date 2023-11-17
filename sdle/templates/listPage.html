@@ -14,8 +14,9 @@
         <div class="w-75">
             <form id="newItemForm" method="Post" action="/newItem" class="d-flex justify-content-between">
                 {% csrf_token %}
-                <h3 class="w-25 border-0 mb-2 rounded" style="background-color: #f4f6f7;">Item:</h3>
-                <input type="text" name="hash" required class="w-50"></input>
+                <h3 class="w-25 border-0 mb-2 rounded" style="background-color: #f4f6f7;">Item Title:</h3>
+                <input type="hidden" name="listHash" value="{{list.hash}}"/>
+                <input type="text" name="title" required class="w-50"></input>
                 <input type="submit" value="Add New Item" class="w-25"></input>
             </form>
         </div>

@@ -15,7 +15,7 @@ class ItemOp(models.Model):
     hash = models.CharField(max_length=256, primary_key=True)
     title = models.CharField(max_length=256)
     type = models.CharField(max_length=3, choices=typeOfOps)
-    count = models.IntegerField()
+    count = models.IntegerField(default=1)
     list = models.ForeignKey(List, on_delete=models.CASCADE)
 
 

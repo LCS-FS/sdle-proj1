@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, HttpRequest, JsonResponse
+from django.http import HttpResponse, HttpRequest, HttpResponseRedirect, JsonResponse
 from django.contrib.auth import authenticate, login, logout
 import random
 from .models import List, ItemOp
@@ -45,25 +45,43 @@ def removeList(request, hash):
 def listPage(request, hash):
     l = List.objects.get(hash=hash)
     
-    try:
-        items = ItemOp.objects.get(list=l)
-        itemMap = {}
-        titleMap = {}
-        for item in items:
-            if not item.hash in titleMap:
-                titleMap[item.hash] = item.title
-            if item.type == 'Add':
-                itemMap[item.hash] += item.count
-            else:
-                itemMap[item.hash] -= item.count
+    items = ItemOp.objects.all().filter(list=l)
+    itemMap = {}
+    titleMap = {}
+    for item in items:
+        print(item.count)
+        if not item.hash in titleMap:
+            titleMap[item.hash] = item.title
+        if not item.hash in itemMap:
+            itemMap[item.hash] = item.count
+        elif item.type == 'Add':
+            itemMap[item.hash] += item.count
+        else:
+            itemMap[item.hash] -= item.count
 
-        itemList = []
-        for hash, cnt in itemMap.items():
-            itemList.append({'hash':hash, 'cnt':cnt, 'title':titleMap[hash]})
-    except:
-        items = []
+
+    itemList = []
+    for hash, cnt in itemMap.items():
+        itemList.append({'hash':hash, 'cnt':cnt, 'title':titleMap[hash]})
+
+    print(itemList)
     #TODO: On page load, request updated items from server 
     # using javascript
     # perhaps use pub/sub strategy with pusher
-    return render(request, 'listPage.html', {'list':l, 'items':items})
+    return render(request, 'listPage.html', {'list':l, 'items':itemList})
+
+def newItem(request):
+    if(request.method != 'POST'):
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    title = request.POST['title']
+    hash = str(random.getrandbits(128))
+    typeOfOp = 'Add'
+    listHash = request.POST['listHash']
+
+    l = List.objects.get(hash=listHash)
+
+    itemOp = ItemOp(list=l, hash=hash, title=title, type=typeOfOp)
+    itemOp.save()
+
+    return redirect("listPage", listHash)
 
