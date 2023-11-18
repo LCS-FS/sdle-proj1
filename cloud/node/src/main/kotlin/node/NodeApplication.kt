@@ -2,13 +2,25 @@ package node
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import org.springframework.boot.web.server.ConfigurableWebServerFactory
+import org.springframework.boot.web.server.WebServerFactoryCustomizer
+import org.springframework.context.annotation.Bean
 import java.io.BufferedOutputStream
 import java.io.OutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
+private var PORT: Int = (1024..65535).random()
+
 @SpringBootApplication
-class NodeApplication
+class NodeApplication {
+	@Bean
+	fun portSelector(): WebServerFactoryCustomizer<ConfigurableWebServerFactory>? {
+		return WebServerFactoryCustomizer { factory ->
+			factory.setPort(PORT)
+		}
+	}
+}
 
 private const val PROXY_ADDRESS: String = "localhost"
 private const val PROXY_PORT: Int       = 12345
@@ -25,13 +37,8 @@ fun connectToProxy() {
 		doOutput = true
 		setRequestProperty("Content-Type", "application/json")
 
-		// Create the JSON payload as a string
-		val jsonInputString = "{\"address\": \"localhost\", \"port\": \"8080\"}"
-
-		// Get the output stream of the connection
+		val jsonInputString = "{\"address\": \"localhost\", \"port\": \"${PORT}\"}"
 		val outputStream: OutputStream = BufferedOutputStream(outputStream)
-
-		// Write the JSON payload to the output stream
 		outputStream.write(jsonInputString.toByteArray())
 		outputStream.flush()
 
