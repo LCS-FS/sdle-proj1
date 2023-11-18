@@ -26,9 +26,7 @@ object NodeService {
     }
 
     fun getNode(listId: Int): Node? {
-        println("Circle: ${circle.toList()}")
         val hash = getHash(listId.toString())
-        println(hash)
         circle[hash]?.let { return it }
         val greaterKeys = circle.filterKeys { it > hash }
         return if (greaterKeys.isEmpty()) circle.entries.firstOrNull()?.value else greaterKeys.entries.first().value

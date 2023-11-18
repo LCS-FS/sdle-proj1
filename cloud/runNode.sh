@@ -6,7 +6,7 @@ destination_dir=""
 
 # Find a unique destination directory name
 counter=1
-while [ -d "${source_dir}${counter}" ]; do
+while [ -d "${source_dir}_${counter}" ]; do
   ((counter++))
 done
 destination_dir="${source_dir}_${counter}"
