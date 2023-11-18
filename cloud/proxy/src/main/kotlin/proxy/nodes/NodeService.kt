@@ -5,6 +5,7 @@ object NodeService {
     private val circle: MutableMap<Int, Node> = mutableMapOf()
 
     fun addNode(node: Node) {
+        println("Node ${node.address}:${node.port} is joining the circle.")
         for (i in 0 until NUM_VIRTUAL_NODES) {
             val virtualNodeName = "${node.address}:${node.port}#$i"
             val hash = virtualNodeName.hashCode()
@@ -13,6 +14,7 @@ object NodeService {
     }
 
     fun removeNode(node: Node) {
+        println("Node ${node.address}:${node.port} is leaving the circle.")
         for (i in 0 until NUM_VIRTUAL_NODES) {
             val virtualNodeName = "${node.address}:${node.port}#$i"
             val hash = virtualNodeName.hashCode()
