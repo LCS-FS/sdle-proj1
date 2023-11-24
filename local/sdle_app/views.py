@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpRequest, HttpResponseRedirect, JsonRes
 from django.contrib.auth import authenticate, login, logout
 import random
 from .models import List, ItemOp
+from .connectUtils import queryProxy, getList, putList, itemOpsFormat
 # Create your views here.
 
 def index(request):
@@ -28,9 +29,8 @@ def connectList(request):
         l = List.objects.get(hash=hash)
     except:
         # TODO: Replace with query to main server
-        title = "PLACEHOLDER"
-        l = List(hash=hash, title=title)
-        l.save()
+        address, port = queryProxy(hash)
+        getList(address, port, hash)
     
     # TODO: redirect to index if list not found
     return redirect('listPage', hash)
@@ -46,23 +46,7 @@ def removeList(request, hash):
 def listPage(request, hash):
     l = List.objects.get(hash=hash)
     
-    items = ItemOp.objects.all().filter(list=l)
-    itemMap = {}
-    titleMap = {}
-    for item in items:
-        if not item.title in itemMap:
-            itemMap[item.title] = item.count
-        elif item.type == 'Add':
-            itemMap[item.title] += item.count
-        else:
-            itemMap[item.title] -= item.count
-
-
-    itemList = []
-    for title, cnt in itemMap.items():
-        if cnt != 0:
-            itemList.append({'cnt':cnt, 'title':title})
-
+    itemList = itemOpsFormat(hash)
     #TODO: On page load, request updated items from server 
     # using javascript
     # perhaps use pub/sub strategy with pusher
