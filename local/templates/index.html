@@ -1,0 +1,38 @@
+{% extends 'common/base.html' %}
+
+{% block page %}
+
+
+<div class="text-center">
+    <h1 class="mb-5 mt-5">Available Lists</h1>
+    <div class="d-flex align-items-center justify-content-center">
+        <div class="w-75">
+            <form id="connectListForm" method="POST" action="/connectList" class="d-flex justify-content-between">
+                {% csrf_token %}
+                <h3 class="w-25 border-0 mb-2 rounded" style="background-color: #f4f6f7;">Hash:</h3>
+                <input type="text" name="hash" required class="w-50"></input>
+                <input type="submit" value="Add Existing List" class="w-25"></input>
+            </form>
+            <form id="newListForm" method="POST" action="/createList" class="d-flex justify-content-between">
+                {% csrf_token %}
+                <h3 class="w-25 border-0 mb-2 rounded" style="background-color: #f4f6f7;">Title:</h3>
+                <input type="text" name="title" required class="w-50"></input>
+                <input type="submit" value="Create New List" class="w-25"></input>
+            </form>
+        </div>
+    </div>
+    <div id="lists" class="d-flex flex-column mt-5 align-items-center justify-content-center">
+        <div class="w-75">
+            <ul class="list-group mb-0">
+                {% for list in lists%}
+                    <li class="list-group-item d-flex align-items-center border-0 mb-2 rounded"
+                    style="background-color: #f4f6f7;">
+                        {% include './starter/listItem.html' %}
+                    </li>
+                {% endfor %}
+                </ul>
+        </div>
+    </div>
+</div>
+
+{% endblock page %}

@@ -22,6 +22,10 @@ from sdle_app import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", views.index, name="index"),
-    path("login/", views.login_view, name="login"),
-    path("authenticate", views.authenticate_view, name="authenticate")
+    path("createList", views.createList, name="createList"),
+    path("connectList", views.connectList, name="connectList"),
+    path("list/<str:hash>", views.listPage, name="listPage"),
+    path("remove/<str:hash>", views.removeList, name="removeList"),
+    path("newItem", views.newItem, name="newItem"),
+    path("updateItem/<str:title>", views.updateItem, name="updateItem"),
 ]
