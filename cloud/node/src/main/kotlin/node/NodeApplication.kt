@@ -83,6 +83,10 @@ fun connectToProxy(tries: Int = 1) {
 }
 
 fun disconnectToProxy(tries : Int = 1) {
+	if (tries > CONNECTION_TRIES) {
+		System.err.println("TIMEOUT: Proxy unavailable at the moment. Try later!")
+		return
+	}
 	val url = URL("http://$PROXY_ADDRESS:$PROXY_PORT/leave-circle")
 	try {
 		with(url.openConnection() as HttpURLConnection) {
