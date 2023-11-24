@@ -30,6 +30,10 @@ def connectList(request):
     except:
         # TODO: Replace with query to main server
         address, port = queryProxy(hash)
+        
+        if address == None or port == None:
+            return redirect('index')
+        
         getList(address, port, hash)
     
     # TODO: redirect to index if list not found
@@ -47,6 +51,8 @@ def listPage(request, hash):
     l = List.objects.get(hash=hash)
     
     itemList = itemOpsFormat(hash)
+    
+    
     #TODO: On page load, request updated items from server 
     # using javascript
     # perhaps use pub/sub strategy with pusher

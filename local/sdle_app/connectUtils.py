@@ -5,13 +5,16 @@ from .models import List, ItemOp
 PROXY = "http://localhost:12345"
 
 def queryProxy(listHash):
-    r = requests.get(PROXY + "/list/" + listHash)
+    try:
+        r = requests.get(PROXY + "/list/" + listHash, timeout=5)
+    except:
+        return None, None
+    
     if r.status_code == 200:
         response_data = r.json()
         address = response_data.get("address")
         port = response_data.get("port")
         if address and port:
-            # Do something with address and port
             return address, port
         else:
             print("Address or port not found in the response.")
@@ -19,7 +22,11 @@ def queryProxy(listHash):
         print("Error:", r.status_code)
 
 def getList(address, port, listHash):
-    r = requests.get("http://" + address + ":" + str(port) + "/list/" + listHash)
+    try:
+        r = requests.get("http://" + address + ":" + str(port) + "/list/" + listHash, timeout=5)
+    except:
+        return
+    
     if r.status_code == 200:
         response_data = r.json()
         name = response_data.get("name")
@@ -40,8 +47,6 @@ def getList(address, port, listHash):
                 itemMap[item.title] = item.cnt
             
             for item in items:
-                # TODO: Update database with name and items
-                
                 # set received items count to 0
                 if item['name'] in itemMap.keys():
                     if itemMap[item['name']] < 0:
