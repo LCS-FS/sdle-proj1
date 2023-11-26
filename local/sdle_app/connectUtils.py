@@ -25,7 +25,7 @@ def getList(address, port, listHash):
     try:
         r = requests.get("http://" + address + ":" + str(port) + "/list/" + listHash, timeout=5)
     except:
-        return
+        return False
     
     if r.status_code == 200:
         response_data = r.json()
@@ -44,7 +44,7 @@ def getList(address, port, listHash):
             itemList = itemOpsFormat(listHash)
             itemMap = {}
             for item in itemList:
-                itemMap[item.title] = item.cnt
+                itemMap[item['title']] = item['cnt']
             
             for item in items:
                 # set received items count to 0
@@ -59,10 +59,13 @@ def getList(address, port, listHash):
                 # set received items count to quantity
                 itemOpAdd = ItemOp(list=l, hash=str(random.getrandbits(128)), title=item['name'], type='Add', count=item['quantity'])
                 itemOpAdd.save()
+                return True
         else:
             print("Name or items not found in the response.")
+            return False
     else:
         print("Error:", r.status_code)
+        return False
 
 
 def putList(address, port, listHash, name, items):

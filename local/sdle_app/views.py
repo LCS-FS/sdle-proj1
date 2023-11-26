@@ -28,15 +28,12 @@ def connectList(request):
     try:
         l = List.objects.get(hash=hash)
     except:
-        # TODO: Replace with query to main server
         address, port = queryProxy(hash)
         
         if address == None or port == None:
             return redirect('index')
         
         getList(address, port, hash)
-    
-    # TODO: redirect to index if list not found
     return redirect('listPage', hash)
 
 def removeList(request, hash):
@@ -48,10 +45,12 @@ def removeList(request, hash):
     return redirect('index')
 
 def listPage(request, hash):
+    address, port = queryProxy(hash)
+    if not (address == None or port == None):
+        getList(address, port, hash)
+    
     l = List.objects.get(hash=hash)
-    
     itemList = itemOpsFormat(hash)
-    
     
     #TODO: On page load, request updated items from server 
     # using javascript
