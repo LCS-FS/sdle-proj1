@@ -1,19 +1,24 @@
 package proxy.nodes
 
 import java.security.MessageDigest
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
+import java.util.concurrent.ConcurrentNavigableMap
+import java.util.concurrent.ConcurrentSkipListMap
 import javax.swing.text.html.HTML.Attribute.N
 
 
 object NodeService {
     private const val NUM_VIRTUAL_NODES = 10
     private const val MAX_NUM_REPLICAS = 3
-    private val circle: MutableMap<Int, Node> = mutableMapOf()
-    private val preferenceLists: MutableMap<Node, MutableList<Node>> = mutableMapOf()
+    private val circle: ConcurrentMap<Int, Node> = ConcurrentSkipListMap()
+    private val preferenceLists: ConcurrentMap<Node, MutableList<Node>> = ConcurrentHashMap()
     private var connectedNodes : Int = 0
 
     private fun getUniqueNodes(): Set<Node> = circle.values.toSet()
 
     fun printPreferenceLists() {
+        if (connectedNodes < 3) return
         for ((key, value) in preferenceLists) {
             println("Key: $key")
             println("Values:")
@@ -22,14 +27,7 @@ object NodeService {
             }
         }
     }
-    fun printCircle() {
-        println("---- CIRCLE --------")
-        for ((key, value) in circle) {
-            println("$key, $value")
-        }
-        print("----- END CIRCLE ----")
 
-    }
     fun updatePreferenceLists() {
         for (node in getUniqueNodes()) {
             val preferenceList = mutableListOf<Node>()
@@ -46,12 +44,12 @@ object NodeService {
             // define number of replicas
             val numReplicas = if (connectedNodes <= MAX_NUM_REPLICAS) connectedNodes - 1 else MAX_NUM_REPLICAS
             var count = 0
-            printCircle()
             while (count < numReplicas) {
                 val greaterKeys = circle.filterKeys { it > hash }
                 val nextEntry = if (greaterKeys.isEmpty()) circle.entries.firstOrNull() else greaterKeys.entries.firstOrNull()
                 val nextNode = nextEntry?.value
                 if (nextNode === null) {
+                    System.err.println("Not enough replicas in the circle.")
                     return
                 }
                 if (nextNode != selfNode && !preferenceList.contains(nextNode)) {
@@ -59,7 +57,6 @@ object NodeService {
                     count++
                 }
                 hash = nextEntry.key
-
             }
             preferenceLists[selfNode] = preferenceList
         }
