@@ -7,6 +7,9 @@ from .models import List, ItemOp
 from .connectUtils import queryProxy, getList, putList, itemOpsFormat
 # Create your views here.
 
+ADDRESS = ""
+PORT = ""
+
 def index(request):
     lists = List.objects.all()
     lists = reversed(lists)
@@ -21,6 +24,7 @@ def createList(request):
     return redirect('listPage', hash)
 
 def connectList(request):
+    global ADDRESS, PORT
     if(request.method != 'POST'):
         return redirect('index')
     
@@ -32,6 +36,7 @@ def connectList(request):
         
         if address == None or port == None:
             return redirect('index')
+        ADDRESS, PORT = address, port
         
         getList(address, port, hash)
     return redirect('listPage', hash)
@@ -45,9 +50,11 @@ def removeList(request, hash):
     return redirect('index')
 
 def listPage(request, hash):
+    global ADDRESS, PORT
     address, port = queryProxy(hash)
     if not (address == None or port == None):
         getList(address, port, hash)
+        ADDRESS, PORT = address, port
     
     l = List.objects.get(hash=hash)
     itemList = itemOpsFormat(hash)
@@ -69,6 +76,10 @@ def newItem(request):
 
     itemOp = ItemOp(list=l, hash=hash, title=title, type=typeOfOp)
     itemOp.save()
+    
+    
+    putList(ADDRESS, PORT, listHash, l.title, itemOpsFormat(listHash))
+    #getList(ADDRESS, PORT, listHash)
 
     return redirect("listPage", listHash)
 
@@ -79,7 +90,6 @@ def updateItem(request, title):
     data = json.loads(body_unicode)
     
     count = data['count']
-    print(count)
     #get previous op
     prevOp = ItemOp.objects.filter(title=title).last()
     l = List.objects.get(hash=prevOp.list.hash)
@@ -95,7 +105,6 @@ def updateItem(request, title):
             originalCnt -= op.count
     
     newCount = int(count) - originalCnt
-    print(newCount)
     if newCount == 0: return JsonResponse({"error": "No changes", "count": originalCnt}, status=400)
     opType = 'Add'
     if newCount < 0:
@@ -105,5 +114,15 @@ def updateItem(request, title):
     itemOp = ItemOp(list=l, hash=str(random.getrandbits(128)), title=title, type=opType, count=newCount)
     itemOp.save()
 
+    putList(ADDRESS, PORT, l.hash, l.title, itemOpsFormat(l.hash))
+    #getList(ADDRESS, PORT, listHash)
+
     return JsonResponse({}, status=200)
 
+def updateAddress(request, address, port):
+    global ADDRESS, PORT
+    ADDRESS, PORT = address, port
+    return JsonResponse({}, status=200)
+
+def requestAddress(request):
+    return JsonResponse({"address": ADDRESS, "port": PORT}, status=200)

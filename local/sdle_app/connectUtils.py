@@ -7,6 +7,7 @@ PROXY = "http://localhost:12345"
 def queryProxy(listHash):
     try:
         r = requests.get(PROXY + "/list/" + listHash, timeout=5)
+        print(r.status_code)
     except:
         return None, None
     
@@ -20,6 +21,7 @@ def queryProxy(listHash):
             print("Address or port not found in the response.")
     else:
         print("Error:", r.status_code)
+        return None, None
 
 def getList(address, port, listHash):
     try:
@@ -31,6 +33,10 @@ def getList(address, port, listHash):
         response_data = r.json()
         name = response_data.get("name")
         items = response_data.get("items")
+        
+        item_names = []
+        for item in items:
+            item_names.append(item['name'])
         
         findList = List.objects.all().filter(hash=listHash)
         if len(findList) == 0:    
@@ -59,7 +65,14 @@ def getList(address, port, listHash):
                 # set received items count to quantity
                 itemOpAdd = ItemOp(list=l, hash=str(random.getrandbits(128)), title=item['name'], type='Add', count=item['quantity'])
                 itemOpAdd.save()
-                return True
+            
+            
+            
+            for item in itemList:
+                if item['title'] not in item_names:
+                    itemOpDel = ItemOp(list=l, hash=str(random.getrandbits(128)), title=item['title'], type='Del', count=item['cnt'])
+                    itemOpDel.save()
+            return True
         else:
             print("Name or items not found in the response.")
             return False
@@ -68,13 +81,25 @@ def getList(address, port, listHash):
         return False
 
 
-def putList(address, port, listHash, name, items):
-    r = requests.put("http://" + address + ":" + str(port) + "/list/" + listHash, json={"name": name, "items": items})
+def putList(address, port, listHash, name, items):    
+    for item in items:
+        item['name'] = item['title']
+        del item['title']
+        item['quantity'] = item['cnt']
+        del item['cnt']
+    
+    try:
+        r = requests.put("http://" + address + ":" + str(port) + "/list", json={"id": listHash, "name": name, "items": items}, timeout=5)
+        print(r.request.body)
+        print(r.text)
+    except:
+        return False
     if r.status_code == 200:
         print("List updated.")
+        return True
     else:
         print("Error:", r.status_code)
-        
+
 def itemOpsFormat(listHash):
     l = List.objects.get(hash=listHash)
     items = ItemOp.objects.all().filter(list=l)
