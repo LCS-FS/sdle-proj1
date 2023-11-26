@@ -19,6 +19,7 @@ def queryProxy(listHash):
             return address, port
         else:
             print("Address or port not found in the response.")
+            return None, None
     else:
         print("Error:", r.status_code)
         return None, None
