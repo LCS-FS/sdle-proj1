@@ -24,12 +24,13 @@ class NodeApplication {
 }
 
 fun main(args: Array<String>) {
-	runApplication<NodeApplication>(*args)
+	val context = runApplication<NodeApplication>(*args)
 
 	println("args: $args")
 
 	if (!setUp()) {
 		System.err.println("Found error while setting up node, terminating...")
+		context.close()
 		return
 	}
 
