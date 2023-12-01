@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS items (
     name     VARCHAR(255) NOT NULL,
     quantity INTEGER      NOT NULL,
     listId   INTEGER      NOT NULL,
-    FOREIGN KEY (listId)  REFERENCES lists(id)
+    FOREIGN KEY (listId)  REFERENCES lists(id) ON DELETE CASCADE
 );
 
 INSERT INTO lists(id, name) VALUES (1, 'My shopping list 1');

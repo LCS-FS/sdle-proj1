@@ -27,6 +27,13 @@ class ShoppingListService(val db: JdbcTemplate) {
     }
 
     fun putList(shoppingList: ShoppingList) {
+        // delete old list representation
+        db.update(
+                "DELETE FROM items WHERE listId = ?",
+                shoppingList.id
+        )
+
+        // insert new list representation
         db.update(
                 "INSERT INTO lists VALUES (?, ?)",
                 shoppingList.id, shoppingList.name
