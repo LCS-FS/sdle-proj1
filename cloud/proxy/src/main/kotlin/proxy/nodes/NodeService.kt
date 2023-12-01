@@ -15,18 +15,7 @@ object NodeService {
 
     private fun getUniqueNodes(): Set<Node> = circle.values.toSet()
 
-    fun printPreferenceLists() {
-        if (connectedNodes < 3) return
-        for ((key, value) in preferenceLists) {
-            println("Key: $key")
-            println("Values:")
-            value.forEach { node ->
-                println("\tNode: $node")
-            }
-        }
-    }
-
-    fun updatePreferenceLists() {
+    private fun updatePreferenceLists() {
         for (node in getUniqueNodes()) {
             val preferenceList = mutableListOf<Node>()
 
@@ -68,16 +57,25 @@ object NodeService {
             val hash = getHash(virtualNodeName)
             circle[hash] = node
         }
+
+        updatePreferenceLists()
     }
 
     fun removeNode(node: Node) {
-        println("Node ${node.address}:${node.port} is leaving the circle.")
-        connectedNodes--
+        var nodeWasRemoved = false
+
         for (i in 0 until NUM_VIRTUAL_NODES) {
             val virtualNodeName = "${node.address}:${node.port}#$i"
             val hash = getHash(virtualNodeName)
-            circle.remove(hash)
+            circle.remove(hash)?.let { nodeWasRemoved = true }
         }
+
+        if (nodeWasRemoved) {
+            println("Node ${node.address}:${node.port} is leaving the circle.")
+            connectedNodes--
+        }
+
+        updatePreferenceLists()
     }
 
     fun getNode(listId: Int): Node? {
