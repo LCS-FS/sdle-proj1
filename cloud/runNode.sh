@@ -18,7 +18,4 @@ cp -r "$source_dir" "$destination_dir"
 cd "$destination_dir" || exit
 
 # Run the desired command
-./gradlew bootRun
-
-# Optionally, you can print a message indicating the process is complete
-echo "Script completed successfully. Source directory: $source_dir, Destination directory: $destination_dir"
+./gradlew bootRun --args="${counter}"
