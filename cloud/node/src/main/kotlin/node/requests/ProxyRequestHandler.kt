@@ -12,13 +12,14 @@ object ProxyRequestHandler : RequestHandler("http://$PROXY_ADDRESS:$PROXY_PORT")
             endpoint: String,
             nodeAddress: String,
             nodePort: Int,
+            nodeId: Int,
             tries: Int,
             timeout: Int
     ): Boolean {
         var triesCount = 0
         while (triesCount < tries) {
             try {
-                val response = sendPOST(endpoint, "{\"address\": \"$nodeAddress\", \"port\": \"$nodePort\"}")
+                val response = sendPOST(endpoint, "{\"address\": \"$nodeAddress\", \"port\": \"$nodePort\", \"id\": \"$nodeId\"}")
                 if (response.code == HttpURLConnection.HTTP_OK) return true
                 else triesCount++
             } catch (e: ConnectException) {
@@ -32,18 +33,20 @@ object ProxyRequestHandler : RequestHandler("http://$PROXY_ADDRESS:$PROXY_PORT")
     fun joinCircle(
             nodeAddress: String,
             nodePort: Int,
+            nodeId: Int,
             tries: Int,
             timeout: Int
     ): Boolean {
-        return sendCircleRequest("/join-circle", nodeAddress, nodePort, tries, timeout)
+        return sendCircleRequest("/join-circle", nodeAddress, nodePort, nodeId, tries, timeout)
     }
 
     fun leaveCircle(
             nodeAddress: String,
             nodePort: Int,
+            nodeId: Int,
             tries: Int,
             timeout: Int
     ): Boolean {
-        return sendCircleRequest("/leave-circle", nodeAddress, nodePort, tries, timeout)
+        return sendCircleRequest("/leave-circle", nodeAddress, nodePort, nodeId, tries, timeout)
     }
 }

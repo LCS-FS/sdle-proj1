@@ -26,9 +26,15 @@ class NodeApplication {
 fun main(args: Array<String>) {
 	val context = runApplication<NodeApplication>(*args)
 
-	println("args: $args")
+	if (args.size != 1) {
+		System.err.println("Please provide an ID for this node.")
+		context.close()
+		return
+	}
 
-	if (!setUp()) {
+	val id = args.first().toInt()
+
+	if (!setUp(id)) {
 		System.err.println("Found error while setting up node, terminating...")
 		context.close()
 		return
@@ -36,13 +42,14 @@ fun main(args: Array<String>) {
 
 }
 
-private fun setUp(): Boolean {
+private fun setUp(id: Int): Boolean {
 
 	// Inform proxy of node shutdown
 	Runtime.getRuntime().addShutdownHook(Thread {
 		ProxyRequestHandler.leaveCircle(
 				ADDRESS,
 				PORT,
+				id,
 				CONNECTION_TRIES,
 				CONNECTION_TIMEOUT_MS
 		)
@@ -52,6 +59,7 @@ private fun setUp(): Boolean {
 	return if (ProxyRequestHandler.joinCircle(
 					ADDRESS,
 					PORT,
+					id,
 					CONNECTION_TRIES,
 					CONNECTION_TIMEOUT_MS
 			)) {

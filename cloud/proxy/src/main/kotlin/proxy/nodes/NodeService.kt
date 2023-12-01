@@ -19,7 +19,7 @@ object NodeService {
         for (node in getUniqueNodes()) {
             val preferenceList = mutableListOf<Node>()
 
-            val physicalNodeName = "${node.address}:${node.port}#0"
+            val physicalNodeName = "${node.id}#0"
             var hash = getHash(physicalNodeName)
             val selfNode = circle[hash]
 
@@ -50,10 +50,10 @@ object NodeService {
 
     }
     fun addNode(node: Node) {
-        println("Node ${node.address}:${node.port} is joining the circle.")
+        println("Node ${node.address}:${node.port} is joining the circle with id ${node.id}.")
         connectedNodes++
         for (i in 0 until NUM_VIRTUAL_NODES) {
-            val virtualNodeName = "${node.address}:${node.port}#$i"
+            val virtualNodeName = "${node.id}#$i"
             val hash = getHash(virtualNodeName)
             circle[hash] = node
         }
@@ -65,13 +65,13 @@ object NodeService {
         var nodeWasRemoved = false
 
         for (i in 0 until NUM_VIRTUAL_NODES) {
-            val virtualNodeName = "${node.address}:${node.port}#$i"
+            val virtualNodeName = "${node.id}#$i"
             val hash = getHash(virtualNodeName)
             circle.remove(hash)?.let { nodeWasRemoved = true }
         }
 
         if (nodeWasRemoved) {
-            println("Node ${node.address}:${node.port} is leaving the circle.")
+            println("Node ${node.address}:${node.port} with id ${node.id} is leaving the circle.")
             connectedNodes--
         }
 
