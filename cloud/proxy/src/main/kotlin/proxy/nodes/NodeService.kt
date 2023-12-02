@@ -4,7 +4,7 @@ import java.security.MessageDigest
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.ConcurrentSkipListMap
-
+import org.zeromq.ZMQ
 
 object NodeService {
     private const val NUM_VIRTUAL_NODES = 10
@@ -13,9 +13,10 @@ object NodeService {
     private val preferenceLists: ConcurrentMap<Node, MutableList<Node>> = ConcurrentHashMap()
     private var connectedNodes : Int = 0
 
+
     private fun getUniqueNodes(): Set<Node> = circle.values.toSet()
 
-    private fun updatePreferenceLists() {
+    fun updatePreferenceLists(publisher: ZMQ.Socket) {
         for (node in getUniqueNodes()) {
             val preferenceList = mutableListOf<Node>()
 
@@ -46,8 +47,10 @@ object NodeService {
                 hash = nextEntry.key
             }
             preferenceLists[selfNode] = preferenceList
-        }
 
+            publisher.sendMore(selfNode.id.toString())
+            publisher.send(preferenceList.toString())
+        }
     }
     fun addNode(node: Node) {
         println("Node ${node.address}:${node.port} is joining the circle with id ${node.id}.")
@@ -57,8 +60,6 @@ object NodeService {
             val hash = getHash(virtualNodeName)
             circle[hash] = node
         }
-
-        updatePreferenceLists()
     }
 
     fun removeNode(node: Node) {
@@ -74,8 +75,6 @@ object NodeService {
             println("Node ${node.address}:${node.port} with id ${node.id} is leaving the circle.")
             connectedNodes--
         }
-
-        updatePreferenceLists()
     }
 
     fun getNode(listId: Int): Node? {
