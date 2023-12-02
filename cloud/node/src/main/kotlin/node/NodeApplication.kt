@@ -23,6 +23,8 @@ class NodeApplication {
 	}
 }
 
+var id: Int = 1
+
 fun main(args: Array<String>) {
 	val context = runApplication<NodeApplication>(*args)
 
@@ -32,14 +34,13 @@ fun main(args: Array<String>) {
 		return
 	}
 
-	val id = args.first().toInt()
+	id = args.first().toInt()
 
 	if (!setUp(id)) {
 		System.err.println("Found error while setting up node, terminating...")
 		context.close()
 		return
 	}
-
 }
 
 private fun setUp(id: Int): Boolean {

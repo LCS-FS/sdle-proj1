@@ -1,7 +1,11 @@
 package proxy.nodes
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Node(
-        val address: String,
-        val port: Int,
-        val id: Int
+        @SerialName("address") val address: String,
+        @SerialName("port") val port: Int,
+        @SerialName("id") val id: Int
 )

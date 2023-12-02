@@ -1,5 +1,7 @@
 package proxy.nodes
 
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.security.MessageDigest
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
@@ -49,7 +51,7 @@ object NodeService {
             preferenceLists[selfNode] = preferenceList
 
             publisher.sendMore(selfNode.id.toString())
-            publisher.send(preferenceList.toString())
+            publisher.send(Json.encodeToString(preferenceList))
         }
     }
     fun addNode(node: Node) {
