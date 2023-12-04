@@ -1,11 +1,12 @@
 package node.shoppinglist
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import node.id
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Service
 import org.zeromq.ZMQ
-import org.zeromq.ZMQException
 
 private const val PUBLISHER_ADDRESS = "localhost"
 private const val PUBLISHER_PORT = 5556
@@ -30,7 +31,14 @@ class ShoppingListService(val db: JdbcTemplate) {
             message = subscriber.recvStr(ZMQ.NOBLOCK)
         }
         if (lastMessage == null) println("No updates to the preference list.")
-        else println("Received: $lastMessage")
+        else {
+            val separatorIndex = lastMessage.indexOf(';')
+            val preferenceListString = lastMessage.slice(separatorIndex + 1 until lastMessage.length)
+            val newPreferenceList = Json.decodeFromString<List<Node>>(preferenceListString)
+            preferenceList.clear()
+            preferenceList.addAll(newPreferenceList)
+            println("New preference list: $preferenceList")
+        }
     }
 
     fun getListById(id: Int): ShoppingList? {
@@ -78,7 +86,9 @@ class ShoppingListService(val db: JdbcTemplate) {
     }
 }
 
+@Serializable
 private data class Node(
         val address: String,
-        val port: Int
+        val port: Int,
+        val id: Int
 )
