@@ -50,8 +50,7 @@ object NodeService {
             }
             preferenceLists[selfNode] = preferenceList
 
-            publisher.sendMore(selfNode.id.toString())
-            publisher.send(Json.encodeToString(preferenceList))
+            publisher.send("${selfNode.id};${Json.encodeToString(preferenceList)}")
         }
     }
     fun addNode(node: Node) {

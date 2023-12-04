@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Service
 import org.zeromq.ZMQ
+import org.zeromq.ZMQException
 
 private const val PUBLISHER_ADDRESS = "localhost"
 private const val PUBLISHER_PORT = 5556
@@ -18,12 +19,18 @@ class ShoppingListService(val db: JdbcTemplate) {
 
     init {
         subscriber.connect("tcp://$PUBLISHER_ADDRESS:$PUBLISHER_PORT")
-        subscriber.subscribe("$id".toByteArray())
+        subscriber.subscribe("$id")
     }
 
     private fun updatePreferenceList() {
-        val message = subscriber.recvStr()
-        println("Received: $message")
+        var message = subscriber.recvStr(ZMQ.NOBLOCK)
+        var lastMessage = message
+        while (message != null) {
+            lastMessage = message
+            message = subscriber.recvStr(ZMQ.NOBLOCK)
+        }
+        if (lastMessage == null) println("No updates to the preference list.")
+        else println("Received: $lastMessage")
     }
 
     fun getListById(id: Int): ShoppingList? {
