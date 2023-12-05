@@ -45,4 +45,15 @@ class ShoppingListService(val db: JdbcTemplate) {
             )
         }
     }
+
+    fun mergeLists(lists: ArrayList<ArrayList<CRDTShoppingListItem>>): ArrayList<CRDTShoppingListItem> {
+        val set = mutableSetOf<CRDTShoppingListItem>()
+        for (list in lists){
+            for (item in list){
+                set.add(item)
+            }
+        }
+
+        return ArrayList(set)
+    }
 }
