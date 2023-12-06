@@ -5,6 +5,7 @@ import kotlinx.serialization.json.Json
 import node.id
 import node.requests.NodeRequestHandler
 import node.requests.NodeRequestResponse
+import node.requests.ProxyRequestHandler
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 import org.zeromq.ZMQ
@@ -44,7 +45,7 @@ class ShoppingListCoordinatorService(override val db: JdbcTemplate) : ShoppingLi
                     currentReads++
                 }
                 is NodeRequestResponse.NotFound -> currentReads++
-                is NodeRequestResponse.FailedToConnect -> TODO("Tell proxy to disconnect this node")
+                is NodeRequestResponse.FailedToConnect -> ProxyRequestHandler.leaveCircle(node.address, node.port, node.id, 1, 0)
             }
         }
 
@@ -65,7 +66,7 @@ class ShoppingListCoordinatorService(override val db: JdbcTemplate) : ShoppingLi
         for (node in preferenceList) {
             val nodeRequestHandler = NodeRequestHandler(node.address, node.port)
             val response = nodeRequestHandler.putList(shoppingList)
-            if (!response) TODO("Tell proxy to disconnect this node")
+            if (!response) ProxyRequestHandler.leaveCircle(node.address, node.port, node.id, 1, 0)
         }
     }
 
