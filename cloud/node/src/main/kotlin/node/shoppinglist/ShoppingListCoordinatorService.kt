@@ -13,7 +13,6 @@ private const val PUBLISHER_ADDRESS = "localhost"
 private const val PUBLISHER_PORT = 5556
 
 private const val REQUIRED_READS  = 1
-private const val REQUIRED_WRITES = 1
 
 @Service
 class ShoppingListCoordinatorService(override val db: JdbcTemplate) : ShoppingListService(db) {
@@ -39,7 +38,7 @@ class ShoppingListCoordinatorService(override val db: JdbcTemplate) : ShoppingLi
         var currentReads = 0
         for (node in preferenceList) {
             val nodeRequestHandler = NodeRequestHandler(node.address, node.port)
-            when (val nodeResponse = nodeRequestHandler.getListById(id, 1, 0)) {
+            when (val nodeResponse = nodeRequestHandler.getListById(id)) {
                 is NodeRequestResponse.Found -> {
                     readLists.add(nodeResponse.shoppingList)
                     currentReads++
@@ -60,7 +59,14 @@ class ShoppingListCoordinatorService(override val db: JdbcTemplate) : ShoppingLi
 
     fun putListCoordinator(shoppingList: ShoppingList) {
         updatePreferenceList()
-        // TODO
+
+        putList(shoppingList)
+
+        for (node in preferenceList) {
+            val nodeRequestHandler = NodeRequestHandler(node.address, node.port)
+            val response = nodeRequestHandler.putList(shoppingList)
+            if (!response) TODO("Tell proxy to disconnect this node")
+        }
     }
 
     private fun updatePreferenceList() {

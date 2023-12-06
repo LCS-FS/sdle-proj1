@@ -1,5 +1,6 @@
 package node.requests
 
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import node.shoppinglist.ShoppingList
 import java.net.ConnectException
@@ -9,8 +10,8 @@ class NodeRequestHandler(address: String, port: Int) : RequestHandler("http://$a
 
     fun getListById(
             id: Int,
-            tries: Int,
-            timeout: Int
+            tries: Int = 1,
+            timeout: Int = 0
     ): NodeRequestResponse {
         var triesCount = 0
         while (triesCount < tries) {
@@ -24,5 +25,23 @@ class NodeRequestHandler(address: String, port: Int) : RequestHandler("http://$a
             Thread.sleep(timeout.toLong())
         }
         return NodeRequestResponse.FailedToConnect
+    }
+
+    fun putList(
+            shoppingList: ShoppingList,
+            tries: Int = 1,
+            timeout: Int = 0
+    ): Boolean {
+        var triesCount = 0
+        while (triesCount < tries) {
+            try {
+                val response = sendPUT("/node-list", Json.encodeToString(shoppingList))
+                return response.code == HttpURLConnection.HTTP_OK
+            } catch (e: ConnectException) {
+                triesCount++
+            }
+            Thread.sleep(timeout.toLong())
+        }
+        return false
     }
 }

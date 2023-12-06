@@ -16,9 +16,17 @@ open class RequestHandler(private val address: String) {
     }
 
     protected fun sendPOST(resource: String, body: String): RequestResponse {
+        return sendWriteRequest(resource, body, "POST")
+    }
+
+    protected fun sendPUT(resource: String, body: String): RequestResponse {
+        return sendWriteRequest(resource, body, "PUT")
+    }
+
+    private fun sendWriteRequest(resource: String, body: String, method: String): RequestResponse {
         val url = URL("$address$resource")
         with(url.openConnection() as HttpURLConnection) {
-            requestMethod = "POST"
+            requestMethod = method
             doOutput = true
             setRequestProperty("Content-Type", "application/json")
 
