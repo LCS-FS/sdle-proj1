@@ -51,38 +51,24 @@ class ShoppingListService(val db: JdbcTemplate) {
             response.getString("name")
         }.firstOrNull() ?: return null
 
-        val items = db.query(
-                "SELECT * FROM items WHERE listId=?",
+        val commits = db.query(
+                "SELECT * FROM commits WHERE listId=?",
                 arrayOf(id)
         ) { rs, _ ->
-            ShoppingListItem(
+            ShoppingListCommit(
+                    rs.getInt("hash"),
                     rs.getString("name"),
-                    rs.getInt("quantity")
+                    rs.getInt("quantity"),
+                    if (rs.getBoolean("sum")) ShoppingListCommitType.ADD else ShoppingListCommitType.REMOVE,
             )
         }
-        return ShoppingList(id, name, items)
+        return ShoppingList(name, commits)
     }
 
     fun putList(shoppingList: ShoppingList) {
         updatePreferenceList()
 
-        // delete old list representation
-        db.update(
-                "DELETE FROM items WHERE listId = ?",
-                shoppingList.id
-        )
-
-        // insert new list representation
-        db.update(
-                "INSERT INTO lists VALUES (?, ?)",
-                shoppingList.id, shoppingList.name
-        )
-        for (item in shoppingList.items) {
-            db.update(
-                    "INSERT INTO items(name, quantity, listId) VALUES (?, ?, ?)",
-                    item.name, item.quantity, shoppingList.id
-            )
-        }
+        // TODO
     }
 }
 
