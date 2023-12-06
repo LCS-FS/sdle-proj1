@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class ClientAPI(val service: ShoppingListService) {
-    @GetMapping("/list/{id}")
+class NodeAPI(val service: ShoppingListService) {
+    @GetMapping("/node-list/{id}")
     fun getListData(@PathVariable("id") id: Int) =
             service.getListById(id) ?:
             ResponseEntity.status(HttpStatus.NOT_FOUND).body("Resource not found for list with id: $id")
 
-    @PutMapping("/list")
+    @PutMapping("/node-list")
     fun putListData(@RequestBody shoppingList: ShoppingList) = service.putList(shoppingList)
 }
