@@ -15,7 +15,7 @@ class NodeRequestHandler(address: String, port: Int) : RequestHandler("http://$a
         var triesCount = 0
         while (triesCount < tries) {
             try {
-                val response = sendGET("/list/$id")
+                val response = sendGET("/node-list/$id")
                 return if (response.code == HttpURLConnection.HTTP_OK) NodeRequestResponse.Found(Json.decodeFromString<ShoppingList>(response.message))
                 else NodeRequestResponse.NotFound
             } catch (e: ConnectException) {

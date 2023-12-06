@@ -40,7 +40,10 @@ class ShoppingListCoordinatorService(override val db: JdbcTemplate) : ShoppingLi
         for (node in preferenceList) {
             val nodeRequestHandler = NodeRequestHandler(node.address, node.port)
             when (val nodeResponse = nodeRequestHandler.getListById(id, 1, 0)) {
-                is NodeRequestResponse.Found -> readLists.add(nodeResponse.shoppingList)
+                is NodeRequestResponse.Found -> {
+                    readLists.add(nodeResponse.shoppingList)
+                    currentReads++
+                }
                 is NodeRequestResponse.NotFound -> currentReads++
                 is NodeRequestResponse.FailedToConnect -> TODO("Tell proxy to disconnect this node")
             }
