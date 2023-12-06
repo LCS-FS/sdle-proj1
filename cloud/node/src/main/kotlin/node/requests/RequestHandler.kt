@@ -11,7 +11,7 @@ open class RequestHandler(private val address: String) {
         val url = URL("$address$resource")
         with(url.openConnection() as HttpURLConnection) {
             requestMethod = "GET"
-            return RequestResponse(responseCode, inputStream.bufferedReader().toString())
+            return RequestResponse(responseCode, inputStream.bufferedReader().readText())
         }
     }
 
@@ -27,7 +27,7 @@ open class RequestHandler(private val address: String) {
             outputStream.flush()
             outputStream.close()
 
-            return RequestResponse(responseCode, inputStream.bufferedReader().toString())
+            return RequestResponse(responseCode, inputStream.bufferedReader().readText())
         }
     }
 }

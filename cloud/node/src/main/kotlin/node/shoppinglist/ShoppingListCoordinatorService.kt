@@ -60,7 +60,7 @@ class ShoppingListCoordinatorService(override val db: JdbcTemplate) : ShoppingLi
 
     fun putListCoordinator(shoppingList: ShoppingList) {
         updatePreferenceList()
-        TODO()
+        // TODO
     }
 
     private fun updatePreferenceList() {
