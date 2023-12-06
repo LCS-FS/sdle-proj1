@@ -19,6 +19,7 @@ object NodeService {
     private fun getUniqueNodes(): Set<Node> = circle.values.toSet()
 
     fun updatePreferenceLists(publisher: ZMQ.Socket) {
+        Thread.sleep(1000)
         for (node in getUniqueNodes()) {
             val preferenceList = mutableListOf<Node>()
 
