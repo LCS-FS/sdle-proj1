@@ -1,6 +1,7 @@
 package node.shoppinglist
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import node.id
 import node.requests.NodeRequestHandler
@@ -27,8 +28,10 @@ class ShoppingListCoordinatorService(override val db: JdbcTemplate) : ShoppingLi
         subscriber.subscribe("$id")
     }
 
-    fun getListByIdCoordinator(id: Int): ShoppingList? {
+    fun getListByIdCoordinator(id: String): ShoppingList? {
         updatePreferenceList()
+
+        println("Received get list $id")
 
         if (preferenceList.size < REQUIRED_READS) return null
 
@@ -60,6 +63,8 @@ class ShoppingListCoordinatorService(override val db: JdbcTemplate) : ShoppingLi
 
     fun putListCoordinator(shoppingList: ShoppingList) {
         updatePreferenceList()
+
+        println("Received put list: ${Json.encodeToString(shoppingList)}")
 
         putList(shoppingList)
 

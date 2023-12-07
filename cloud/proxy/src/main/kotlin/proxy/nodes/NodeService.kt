@@ -79,8 +79,8 @@ object NodeService {
         }
     }
 
-    fun getNode(listId: Int): Node? {
-        val hash = getHash(listId.toString())
+    fun getNode(listId: String): Node? {
+        val hash = getHash(listId)
         circle[hash]?.let { return it }
         val greaterKeys = circle.filterKeys { it > hash }
         return if (greaterKeys.isEmpty()) circle.entries.firstOrNull()?.value else greaterKeys.entries.first().value

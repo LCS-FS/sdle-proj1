@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class NodeAPI(@Qualifier("shoppingListService") val service: ShoppingListService) {
     @GetMapping("/node-list/{id}")
-    fun getListData(@PathVariable("id") id: Int) =
+    fun getListData(@PathVariable("id") id: String) =
             service.getListById(id) ?:
             ResponseEntity.status(HttpStatus.NOT_FOUND).body("Resource not found for list with id: $id")
 

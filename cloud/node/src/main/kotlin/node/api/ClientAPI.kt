@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 class ClientAPI(val service: ShoppingListCoordinatorService) {
     @GetMapping("/list/{id}")
-    fun getListData(@PathVariable("id") id: Int) =
+    fun getListData(@PathVariable("id") id: String) =
             service.getListByIdCoordinator(id) ?:
             ResponseEntity.status(HttpStatus.NOT_FOUND).body("Resource not found for list with id: $id")
 

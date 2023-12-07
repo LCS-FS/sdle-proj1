@@ -9,7 +9,7 @@ import java.net.HttpURLConnection
 class NodeRequestHandler(address: String, port: Int) : RequestHandler("http://$address:$port") {
 
     fun getListById(
-            id: Int,
+            id: String,
             tries: Int = 1,
             timeout: Int = 0
     ): NodeRequestResponse {

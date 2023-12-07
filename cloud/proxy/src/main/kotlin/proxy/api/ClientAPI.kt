@@ -10,7 +10,7 @@ import proxy.nodes.NodeService
 @RestController
 class ClientAPI {
     @GetMapping("/list/{id}")
-    fun getListCoordinator(@PathVariable("id") id: Int) =
+    fun getListCoordinator(@PathVariable("id") id: String) =
             NodeService.getNode(id) ?:
             ResponseEntity.status(HttpStatus.NOT_FOUND).body("No nodes available.")
 }

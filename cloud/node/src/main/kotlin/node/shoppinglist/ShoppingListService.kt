@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 @Service
 class ShoppingListService(val db: JdbcTemplate) {
 
-    fun getListById(id: Int): ShoppingList? {
+    fun getListById(id: String): ShoppingList? {
         val name = db.query(
                 "SELECT name FROM lists where id=?",
                 id
