@@ -7,7 +7,7 @@ import org.springframework.boot.web.server.ConfigurableWebServerFactory
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
 import org.springframework.context.annotation.Bean
 
-private const val ADDRESS: String = "localhost"
+private const val ADDRESS: String = "10.227.156.30"
 private var       PORT:    Int    = (1024..65535).random()
 
 private const val CONNECTION_TRIES:      Int = 3

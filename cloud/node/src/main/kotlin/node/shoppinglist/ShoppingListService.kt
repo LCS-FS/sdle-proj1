@@ -21,7 +21,7 @@ class ShoppingListService(val db: JdbcTemplate) {
                 arrayOf(id)
         ) { rs, _ ->
             ShoppingListCommit(
-                    rs.getInt("hash"),
+                    rs.getString("hash"),
                     rs.getString("name"),
                     rs.getInt("quantity"),
                     if (rs.getBoolean("sum")) ShoppingListCommitType.ADD else ShoppingListCommitType.REMOVE,
