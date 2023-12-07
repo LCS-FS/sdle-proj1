@@ -4,7 +4,11 @@ from django.http import HttpResponse, HttpRequest, HttpResponseRedirect, JsonRes
 from django.contrib.auth import authenticate, login, logout
 import random
 from .models import List, ItemOp
+from .connectUtils import queryProxy, getList, putList, itemOpsFormat
 # Create your views here.
+
+ADDRESS = ""
+PORT = ""
 
 def index(request):
     lists = List.objects.all()
@@ -20,6 +24,7 @@ def createList(request):
     return redirect('listPage', hash)
 
 def connectList(request):
+    global ADDRESS, PORT
     if(request.method != 'POST'):
         return redirect('index')
     
@@ -27,12 +32,13 @@ def connectList(request):
     try:
         l = List.objects.get(hash=hash)
     except:
-        # TODO: Replace with query to main server
-        title = "PLACEHOLDER"
-        l = List(hash=hash, title=title)
-        l.save()
-    
-    # TODO: redirect to index if list not found
+        address, port = queryProxy(hash)
+        
+        if address == None or port == None:
+            return redirect('index')
+        ADDRESS, PORT = address, port
+        
+        getList(address, port, hash)
     return redirect('listPage', hash)
 
 def removeList(request, hash):
@@ -44,25 +50,15 @@ def removeList(request, hash):
     return redirect('index')
 
 def listPage(request, hash):
-    l = List.objects.get(hash=hash)
+    global ADDRESS, PORT
+    address, port = queryProxy(hash)
+    if not (address == None or port == None):
+        getList(address, port, hash)
+        ADDRESS, PORT = address, port
     
-    items = ItemOp.objects.all().filter(list=l)
-    itemMap = {}
-    titleMap = {}
-    for item in items:
-        if not item.title in itemMap:
-            itemMap[item.title] = item.count
-        elif item.type == 'Add':
-            itemMap[item.title] += item.count
-        else:
-            itemMap[item.title] -= item.count
-
-
-    itemList = []
-    for title, cnt in itemMap.items():
-        if cnt != 0:
-            itemList.append({'cnt':cnt, 'title':title})
-
+    l = List.objects.get(hash=hash)
+    itemList = itemOpsFormat(hash)
+    
     #TODO: On page load, request updated items from server 
     # using javascript
     # perhaps use pub/sub strategy with pusher
@@ -80,6 +76,10 @@ def newItem(request):
 
     itemOp = ItemOp(list=l, hash=hash, title=title, type=typeOfOp)
     itemOp.save()
+    
+    
+    putList(ADDRESS, PORT, listHash, l.title, itemOpsFormat(listHash))
+    #getList(ADDRESS, PORT, listHash)
 
     return redirect("listPage", listHash)
 
@@ -90,7 +90,6 @@ def updateItem(request, title):
     data = json.loads(body_unicode)
     
     count = data['count']
-    print(count)
     #get previous op
     prevOp = ItemOp.objects.filter(title=title).last()
     l = List.objects.get(hash=prevOp.list.hash)
@@ -106,7 +105,6 @@ def updateItem(request, title):
             originalCnt -= op.count
     
     newCount = int(count) - originalCnt
-    print(newCount)
     if newCount == 0: return JsonResponse({"error": "No changes", "count": originalCnt}, status=400)
     opType = 'Add'
     if newCount < 0:
@@ -116,5 +114,15 @@ def updateItem(request, title):
     itemOp = ItemOp(list=l, hash=str(random.getrandbits(128)), title=title, type=opType, count=newCount)
     itemOp.save()
 
+    putList(ADDRESS, PORT, l.hash, l.title, itemOpsFormat(l.hash))
+    #getList(ADDRESS, PORT, listHash)
+
     return JsonResponse({}, status=200)
 
+def updateAddress(request, address, port):
+    global ADDRESS, PORT
+    ADDRESS, PORT = address, port
+    return JsonResponse({}, status=200)
+
+def requestAddress(request):
+    return JsonResponse({"address": ADDRESS, "port": PORT}, status=200)
