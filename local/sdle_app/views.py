@@ -31,13 +31,15 @@ def connectList(request):
     hash = request.POST['hash']
     try:
         l = List.objects.get(hash=hash)
+        print('found list')
     except:
         address, port = queryProxy(hash)
         
-        if address == None or port == None:
+        if address is None or port is None:
             return redirect('index')
         ADDRESS, PORT = address, port
         
+        print(f"address: {address}, port: {port}")
         getList(address, port, hash)
     return redirect('listPage', hash)
 
@@ -77,8 +79,10 @@ def newItem(request):
     itemOp = ItemOp(list=l, hash=hash, title=title, type=typeOfOp)
     itemOp.save()
     
+    l = List.objects.get(hash=listHash)
+    items = ItemOp.objects.all().filter(list=l)
     
-    putList(ADDRESS, PORT, listHash, l.title, itemOpsFormat(listHash))
+    putList(ADDRESS, PORT, listHash, l.title, items)
     #getList(ADDRESS, PORT, listHash)
 
     return redirect("listPage", listHash)
@@ -114,7 +118,7 @@ def updateItem(request, title):
     itemOp = ItemOp(list=l, hash=str(random.getrandbits(128)), title=title, type=opType, count=newCount)
     itemOp.save()
 
-    putList(ADDRESS, PORT, l.hash, l.title, itemOpsFormat(l.hash))
+    putList(ADDRESS, PORT, l.hash, l.title, ItemOp.objects.all().filter(list=l))
     #getList(ADDRESS, PORT, listHash)
 
     return JsonResponse({}, status=200)

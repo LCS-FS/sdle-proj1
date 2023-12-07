@@ -2,7 +2,7 @@ import random
 import requests
 from .models import List, ItemOp
 
-PROXY = "http://localhost:12345"
+PROXY = "http://10.227.156.30:12345"
 
 def queryProxy(listHash):
     try:
@@ -33,13 +33,11 @@ def getList(address, port, listHash):
     if r.status_code == 200:
         response_data = r.json()
         name = response_data.get("name")
-        items = response_data.get("items")
-        
-        item_names = []
-        for item in items:
-            item_names.append(item['name'])
+        items = response_data.get("commits")
         
         findList = List.objects.all().filter(hash=listHash)
+        
+        print(f"findList: {findList}")
         if len(findList) == 0:    
             l = List(hash=listHash, title=name)
             l.save()
@@ -48,31 +46,18 @@ def getList(address, port, listHash):
             print(name)
             l = List.objects.get(hash=listHash)
             
-            itemList = itemOpsFormat(listHash)
-            itemMap = {}
-            for item in itemList:
-                itemMap[item['title']] = item['cnt']
-            
             for item in items:
-                # set received items count to 0
-                if item['name'] in itemMap.keys():
-                    if itemMap[item['name']] < 0:
-                        type = 'Add'
-                    else:
-                        type = 'Del'
-                    itemOpDel = ItemOp(list=l, hash=str(random.getrandbits(128)), title=item['name'], type=type, count=itemMap[item['name']])
-                    itemOpDel.save()
-                    
-                # set received items count to quantity
-                itemOpAdd = ItemOp(list=l, hash=str(random.getrandbits(128)), title=item['name'], type='Add', count=item['quantity'])
-                itemOpAdd.save()
-            
-            
-            
-            for item in itemList:
-                if item['title'] not in item_names:
-                    itemOpDel = ItemOp(list=l, hash=str(random.getrandbits(128)), title=item['title'], type='Del', count=item['cnt'])
-                    itemOpDel.save()
+                if item['type'] == 'ADD':
+                    typ = 'Add'
+                else:
+                    typ = 'Rem'
+                itemOp = ItemOp(hash=item['hash'], title=item['itemName'], type=typ, count=item['count'], list=l)
+                
+                # if itemOp not in database, add
+                try:
+                    itemFound = ItemOp.objects.get(itemOp)
+                except:
+                    itemOp.save()
             return True
         else:
             print("Name or items not found in the response.")
@@ -83,14 +68,21 @@ def getList(address, port, listHash):
 
 
 def putList(address, port, listHash, name, items):    
+    itemList = []
     for item in items:
-        item['name'] = item['title']
-        del item['title']
-        item['quantity'] = item['cnt']
-        del item['cnt']
+        if item.type == 'Add':
+            typ = 'ADD'
+        else:
+            typ = 'REMOVE'
+        itemList.append({
+            'hash':item.hash,
+            'itemName':item.title,
+            'count': item.count,
+            'type': typ
+            })
     
     try:
-        r = requests.put("http://" + address + ":" + str(port) + "/list", json={"id": listHash, "name": name, "items": items}, timeout=5)
+        r = requests.put("http://" + address + ":" + str(port) + "/list", json={"id": listHash, "name": name, "commits": itemList}, timeout=5)
         print(r.request.body)
         print(r.text)
     except:
