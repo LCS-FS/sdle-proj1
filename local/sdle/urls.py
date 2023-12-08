@@ -29,4 +29,5 @@ urlpatterns = [
     path("newItem", views.newItem, name="newItem"),
     path("updateItem/<str:title>", views.updateItem, name="updateItem"),
     path("setProxy", views.setProxy, name="setProxy"),
+    path("list/<str:hash>/poll", views.poll, name="poll"),
 ]

@@ -22,20 +22,10 @@
         </div>
     </div>
     <div id="lists" class="d-flex flex-column mt-5 align-items-center justify-content-center">
-        <div class="w-75">
-            <ul class="list-group mb-0">
-                {% comment "" %}TODO: show items{% endcomment %}
-                {% for item in items%}
-                    <li class="list-group-item d-flex align-items-center border-0 mb-2 rounded"
-                    style="background-color: #f4f6f7;">
-                        {% include './listPage/listItem.html' %}
-                    </li>
-                {% endfor %}
-            </ul>
+        <div id="itemList" class="w-75">
+            {% include "listPage/listItems.html" %}
         </div>
     </div>
 </div>
-
-
 
 {% endblock page %}

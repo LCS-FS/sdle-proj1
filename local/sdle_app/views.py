@@ -2,6 +2,7 @@ import json
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect, JsonResponse
 from django.contrib.auth import authenticate, login, logout
+from django.template.loader import render_to_string
 import random
 from .models import List, ItemOp
 from .connectUtils import queryProxy, getList, putList, itemOpsFormat, setProxy as setProxyUtil, getProxy
@@ -141,3 +142,15 @@ def setProxy(request):
     host = request.POST['host']
     setProxyUtil(host)
     return redirect('index')
+
+def poll(request, hash):
+    if(request.method != 'GET'):
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    print(f"polling address: {ADDRESS}, port: {PORT}, hash: {hash}")
+    if not getList(ADDRESS, PORT, hash):
+        return JsonResponse({"error": "Error getting list"}, status=500)
+    
+    itemList = itemOpsFormat(hash)
+    print(itemList)
+    html = render_to_string('listPage/listItems.html', {'items':itemList})
+    return JsonResponse({"html": html, "itemList":itemList}, status=200)
