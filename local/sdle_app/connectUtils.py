@@ -27,8 +27,11 @@ def queryProxy(listHash):
 def getList(address, port, listHash):
     try:
         r = requests.get("http://" + address + ":" + str(port) + "/list/" + listHash, timeout=5)
-    except:
+        print(f"getList: {r.status_code}")
+    except Exception as e:
+        print(f"getList Exception: {e}")
         return False
+    
     
     if r.status_code == 200:
         response_data = r.json()
