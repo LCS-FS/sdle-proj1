@@ -58,10 +58,11 @@ def listPage(request, hash):
     global ADDRESS, PORT
     address, port = queryProxy(hash)
     if not (address == None or port == None):
+        l = List.objects.get(hash=hash)
+        putList(address, port, l.hash, l.title, ItemOp.objects.all().filter(list=l))
         getList(address, port, hash)
         ADDRESS, PORT = address, port
     
-    l = List.objects.get(hash=hash)
     itemList = itemOpsFormat(hash)
     
     #TODO: On page load, request updated items from server 
