@@ -146,11 +146,11 @@ def setProxy(request):
 def poll(request, hash):
     if(request.method != 'GET'):
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-    print(f"polling address: {ADDRESS}, port: {PORT}, hash: {hash}")
+    
     if not getList(ADDRESS, PORT, hash):
         return JsonResponse({"error": "Error getting list"}, status=500)
     
     itemList = itemOpsFormat(hash)
     print(itemList)
     html = render_to_string('listPage/listItems.html', {'items':itemList})
-    return JsonResponse({"html": html, "itemList":itemList}, status=200)
+    return JsonResponse({"html_content": html, "itemList":itemList}, status=200)

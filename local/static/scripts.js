@@ -1,5 +1,51 @@
 url = window.location.href;
 if(url.includes("list")){
+    arrows()
+    $(document).ready(function(){
+        // Periodically call the updatePage function (e.g., every 5 seconds)
+        setInterval(updatePage, 5000);
+    });
+}else{
+    window.addEventListener( "pageshow", function ( event ) {
+        var historyTraversal = event.persisted || 
+            ( typeof window.performance != "undefined" && 
+                window.performance.navigation.type === 2 );
+        if ( historyTraversal ) {
+          // Handle page restore.
+          window.location.reload(true);
+        }
+      });
+}
+
+function updatePage() {
+    $.ajax({
+        url: url+'/poll',  // URL of your Django view
+        type: 'GET',
+        success: function (data) {
+            itemListAjax = data.itemList
+            itemListInPage = []
+            listItems = document.querySelectorAll(".listItem")
+            listItems.forEach(element => {
+                itemListInPage.push({"cnt": parseInt(element.querySelector(".cnt").value), "title": element.id})
+            });
+            
+            if(!arraysAreEqual(itemListAjax, itemListInPage)){
+                console.log("update")
+                // Update the content with the received HTML snippet
+                $('#itemList').html(data.html_content);
+            }
+        },
+        error: function (error) {
+            console.log('Error:', error);
+        }
+    });
+}
+
+function arraysAreEqual(array1, array2) {
+    return JSON.stringify(array1) === JSON.stringify(array2);
+}
+
+function arrows(){
     arrows = document.querySelectorAll(".cnt")
     arrows.forEach(element => {
         element.addEventListener("keydown", isNumber)
@@ -35,16 +81,6 @@ if(url.includes("list")){
             }
         })
     });
-}else{
-    window.addEventListener( "pageshow", function ( event ) {
-        var historyTraversal = event.persisted || 
-            ( typeof window.performance != "undefined" && 
-                window.performance.navigation.type === 2 );
-        if ( historyTraversal ) {
-          // Handle page restore.
-          window.location.reload(true);
-        }
-      });
 }
 
 function isNumber(evt){
