@@ -53,6 +53,7 @@ class ShoppingListCoordinatorService(override val db: JdbcTemplate) : ShoppingLi
         }
 
         val mergedList = mergeShoppingLists(readLists)
+        println("merged list: $mergedList")
         if (currentReads > 0 && mergedList != null) {
             putListCoordinator(mergedList)
         }

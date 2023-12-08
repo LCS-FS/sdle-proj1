@@ -3,10 +3,13 @@ package node.shoppinglist
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Service
+import java.util.concurrent.locks.ReentrantLock
 
 
 @Service
 class ShoppingListService(val db: JdbcTemplate) {
+
+    private val lock = ReentrantLock()
 
     fun getListById(id: String): ShoppingList? {
         val name = db.query(
@@ -31,6 +34,7 @@ class ShoppingListService(val db: JdbcTemplate) {
     }
 
     fun putList(shoppingList: ShoppingList) {
+        lock.lock()
         // delete old list representation
         db.update(
                 "DELETE FROM lists WHERE id = ?",
@@ -48,5 +52,6 @@ class ShoppingListService(val db: JdbcTemplate) {
                     commit.hash, commit.itemName, commit.count, commit.type == ShoppingListCommitType.ADD, shoppingList.id
             )
         }
+        lock.lock()
     }
 }
