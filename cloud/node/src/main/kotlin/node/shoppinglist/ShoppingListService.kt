@@ -52,6 +52,6 @@ class ShoppingListService(val db: JdbcTemplate) {
                     commit.hash, commit.itemName, commit.count, commit.type == ShoppingListCommitType.ADD, shoppingList.id
             )
         }
-        lock.lock()
+        lock.unlock()
     }
 }
