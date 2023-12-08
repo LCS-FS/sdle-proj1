@@ -26,6 +26,7 @@ class ShoppingListCoordinatorService(override val db: JdbcTemplate) : ShoppingLi
     init {
         subscriber.connect("tcp://$PUBLISHER_ADDRESS:$PUBLISHER_PORT")
         subscriber.subscribe("$id")
+        println("Subscribed for id $id!")
     }
 
     fun getListByIdCoordinator(id: String): ShoppingList? {
@@ -53,7 +54,6 @@ class ShoppingListCoordinatorService(override val db: JdbcTemplate) : ShoppingLi
         }
 
         val mergedList = mergeShoppingLists(readLists)
-        println("merged list: $mergedList")
         if (currentReads > 0 && mergedList != null) {
             putListCoordinator(mergedList)
         }

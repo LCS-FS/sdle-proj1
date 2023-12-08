@@ -26,15 +26,15 @@ class NodeApplication {
 var id: Int = 1
 
 fun main(args: Array<String>) {
-	val context = runApplication<NodeApplication>(*args)
 
 	if (args.size != 1) {
 		System.err.println("Please provide an ID for this node.")
-		context.close()
 		return
 	}
 
 	id = args.first().toInt()
+
+	val context = runApplication<NodeApplication>(*args)
 
 	if (!setUp(id)) {
 		System.err.println("Found error while setting up node, terminating...")
