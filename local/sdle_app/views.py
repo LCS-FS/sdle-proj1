@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpRequest, HttpResponseRedirect, JsonRes
 from django.contrib.auth import authenticate, login, logout
 import random
 from .models import List, ItemOp
-from .connectUtils import queryProxy, getList, putList, itemOpsFormat
+from .connectUtils import queryProxy, getList, putList, itemOpsFormat, setProxy as setProxyUtil, getProxy
 # Create your views here.
 
 ADDRESS = ""
@@ -13,7 +13,8 @@ PORT = ""
 def index(request):
     lists = List.objects.all()
     lists = reversed(lists)
-    return render(request, 'index.html', {'lists': lists})
+    proxy = getProxy()
+    return render(request, 'index.html', {'lists': lists, 'proxy': proxy})
 
 def createList(request):
     if(request.method != 'POST'):
@@ -34,13 +35,15 @@ def connectList(request):
         print('found list')
     except:
         address, port = queryProxy(hash)
+        print(f"address: {address}, port: {port}")
         
         if address is None or port is None:
             return redirect('index')
         ADDRESS, PORT = address, port
         
         print(f"address: {address}, port: {port}")
-        getList(address, port, hash)
+        if not getList(address, port, hash):
+            return redirect('index')
     return redirect('listPage', hash)
 
 def removeList(request, hash):
@@ -83,7 +86,7 @@ def newItem(request):
     items = ItemOp.objects.all().filter(list=l)
     
     putList(ADDRESS, PORT, listHash, l.title, items)
-    #getList(ADDRESS, PORT, listHash)
+    getList(ADDRESS, PORT, listHash)
 
     return redirect("listPage", listHash)
 
@@ -119,7 +122,7 @@ def updateItem(request, title):
     itemOp.save()
 
     putList(ADDRESS, PORT, l.hash, l.title, ItemOp.objects.all().filter(list=l))
-    #getList(ADDRESS, PORT, listHash)
+    getList(ADDRESS, PORT, l.hash)
 
     return JsonResponse({}, status=200)
 
@@ -130,3 +133,10 @@ def updateAddress(request, address, port):
 
 def requestAddress(request):
     return JsonResponse({"address": ADDRESS, "port": PORT}, status=200)
+
+def setProxy(request):
+    if(request.method != 'POST'):
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    host = request.POST['host']
+    setProxyUtil(host)
+    return redirect('index')

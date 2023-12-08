@@ -2,7 +2,7 @@ import random
 import requests
 from .models import List, ItemOp
 
-PROXY = "http://10.227.156.30:12345"
+PROXY = "http://localhost:12345"
 
 def queryProxy(listHash):
     try:
@@ -63,7 +63,7 @@ def getList(address, port, listHash):
             print("Name or items not found in the response.")
             return False
     else:
-        print("Error:", r.status_code)
+        print("GetList Error:", r.status_code)
         return False
 
 
@@ -110,3 +110,15 @@ def itemOpsFormat(listHash):
         if cnt != 0:
             itemList.append({'cnt':cnt, 'title':title})
     return itemList
+
+def setProxy(host):
+    global PROXY
+    PROXY = f"http://{host}:12345"
+    print(f"Proxy set to {PROXY}")
+    return
+
+def getProxy():
+    global PROXY
+    proxy = PROXY
+    proxy = proxy.replace("http://", "").split(":")[0]
+    return proxy
