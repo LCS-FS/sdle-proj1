@@ -25,7 +25,7 @@ class ShoppingListCoordinatorService(override val db: JdbcTemplate) : ShoppingLi
 
     init {
         subscriber.connect("tcp://$PUBLISHER_ADDRESS:$PUBLISHER_PORT")
-        subscriber.subscribe("$id")
+        subscriber.subscribe("$id;")
         println("Subscribed for id $id!")
     }
 
