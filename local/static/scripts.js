@@ -5,7 +5,9 @@ if(url.includes("list")){
     arrows()
     $(document).ready(function(){
         // Periodically call the updatePage function (e.g., every 5 seconds)
-        setInterval(updatePage, 5000);
+        setInterval(() => {
+            updatePage().catch(console.error);
+        }, 5000);
     });
     $("#onlineCheck").change(handleCheckboxChange);
 }else{
@@ -43,29 +45,38 @@ function handleCheckboxChange() {
     });
   }
 
-function updatePage() {
+async function updatePage() {
     if(!isChecked) return
-    $.ajax({
-        url: url+'/poll',  // URL of your Django view
-        type: 'GET',
-        success: function (data) {
-            itemListAjax = data.itemList
-            itemListInPage = []
-            listItems = document.querySelectorAll(".listItem")
-            listItems.forEach(element => {
-                itemListInPage.push({"cnt": parseInt(element.querySelector(".cnt").value), "title": element.id})
-            });
-            
-            if(!arraysAreEqual(itemListAjax, itemListInPage)){
-                console.log("update")
-                // Update the content with the received HTML snippet
-                $('#itemList').html(data.html_content);
+    await pollAjax()
+}
+
+async function pollAjax(){
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: url+'/poll',  // URL of your Django view
+            headers:{
+                'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()
+            },
+            type: 'GET',
+            success: function (data) {
+                itemListAjax = data.itemList
+                itemListInPage = []
+                listItems = document.querySelectorAll(".listItem")
+                listItems.forEach(element => {
+                    itemListInPage.push({"cnt": parseInt(element.querySelector(".cnt").value), "title": element.id})
+                });
+                
+                if(!arraysAreEqual(itemListAjax, itemListInPage)){
+                    console.log("update")
+                    // Update the content with the received HTML snippet
+                    $('#itemList').html(data.html_content);
+                }
+            },
+            error: function (error) {
+                console.log('Error:', error);
             }
-        },
-        error: function (error) {
-            console.log('Error:', error);
-        }
-    });
+        });
+    })
 }
 
 function arraysAreEqual(array1, array2) {
