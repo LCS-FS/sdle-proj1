@@ -116,7 +116,10 @@ async function arrowAjax(element, formData){
                 'X-CSRFToken': formData.csrfmiddlewaretoken
             },
     
-            success: function (response) {},
+            success: function (response) {
+                //reload page
+                window.location.reload()
+            },
             
             error: function(response, status, error){
                 alert(response)
