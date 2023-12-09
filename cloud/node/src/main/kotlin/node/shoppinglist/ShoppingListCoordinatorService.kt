@@ -89,14 +89,6 @@ class ShoppingListCoordinatorService(override val db: JdbcTemplate) : ShoppingLi
             println("New preference list: $preferenceList")
         }
     }
-
-    private fun mergeShoppingLists(shoppingLists: List<ShoppingList>): ShoppingList? {
-        if (shoppingLists.isEmpty()) return null
-
-        val commitsSet = mutableSetOf<ShoppingListCommit>()
-        commitsSet.addAll(shoppingLists.map { it.commits }.flatten())
-        return ShoppingList(shoppingLists.first().id, shoppingLists.first().name, commitsSet.toList())
-    }
 }
 
 @Serializable
