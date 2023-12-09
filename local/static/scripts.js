@@ -2,11 +2,12 @@ url = window.location.href;
 var isChecked = true;
 
 if(url.includes("list")){
-    arrows()
+    arrowsFunc()
     $(document).ready(function(){
         // Periodically call the updatePage function (e.g., every 5 seconds)
         setInterval(() => {
             updatePage().catch(console.error);
+            console.log("updating")
         }, 5000);
     });
     $("#onlineCheck").change(handleCheckboxChange);
@@ -47,47 +48,46 @@ function handleCheckboxChange() {
 
 async function updatePage() {
     if(!isChecked) return
-    await pollAjax()
+    $.ajax({
+        url: url+'/poll',  // URL of your Django view
+        headers:{
+            'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()
+        },
+        type: 'GET',
+        success: function (data) {
+            $(document).trigger("updatePagePoll", data);
+        },
+        error: function (error) {
+            console.log('Error:', error);
+        }
+    });
 }
 
-async function pollAjax(){
-    return new Promise((resolve, reject) => {
-        $.ajax({
-            url: url+'/poll',  // URL of your Django view
-            headers:{
-                'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()
-            },
-            type: 'GET',
-            success: function (data) {
-                itemListAjax = data.itemList
-                itemListInPage = []
-                listItems = document.querySelectorAll(".listItem")
-                listItems.forEach(element => {
-                    itemListInPage.push({"cnt": parseInt(element.querySelector(".cnt").value), "title": element.id})
-                });
-                
-                if(!arraysAreEqual(itemListAjax, itemListInPage)){
-                    console.log("update")
-                    // Update the content with the received HTML snippet
-                    $('#itemList').html(data.html_content);
-                }
-            },
-            error: function (error) {
-                console.log('Error:', error);
-            }
-        });
-    })
-}
+$(document).on("updatePagePoll", function (event, data) {
+    itemListAjax = data.itemList
+    itemListInPage = []
+    listItems = document.querySelectorAll(".listItem")
+    listItems.forEach(element => {
+        itemListInPage.push({"cnt": parseInt(element.querySelector(".cnt").value), "title": element.id})
+    });
+    
+    if(!arraysAreEqual(itemListAjax, itemListInPage)){
+        console.log("update")
+        // Update the content with the received HTML snippet
+        $('#itemList').html(data.html_content);
+        arrowsFunc();
+    }
+});
 
 function arraysAreEqual(array1, array2) {
     return JSON.stringify(array1) === JSON.stringify(array2);
 }
 
-function arrows(){
+function arrowsFunc(){
     arrows = document.querySelectorAll(".cnt")
     arrows.forEach(element => {
         element.addEventListener("keydown", isNumber)
-        element.addEventListener("input", async function(){
+        element.addEventListener("input", function(){
             if(element.value === "") return
 
             //send backend post request to have new op
@@ -96,7 +96,24 @@ function arrows(){
                 "count":element.value
             }
 
-            await arrowAjax(element, formData)
+            $.ajax({
+                data:JSON.stringify(formData),
+                type:"POST",
+                url:"/updateItem/"+element.id.split('_')[1],
+                
+                headers:{
+                    'X-CSRFToken': formData.csrfmiddlewaretoken
+                },
+        
+                success: function (response) {
+                    //reload page
+                },
+                
+                error: function(response, status, error){
+                    alert(response)
+                    window.location.reload()
+                }
+            });
 
             if(parseInt(element.value)===0){
                 const grandParent = element.parentNode.parentNode
@@ -105,29 +122,6 @@ function arrows(){
     });
 }
 
-async function arrowAjax(element, formData){
-    return new Promise((resolve, reject) => {
-        $.ajax({
-            data:JSON.stringify(formData),
-            type:"POST",
-            url:"/updateItem/"+element.id.split('_')[1],
-            
-            headers:{
-                'X-CSRFToken': formData.csrfmiddlewaretoken
-            },
-    
-            success: function (response) {
-                //reload page
-                window.location.reload()
-            },
-            
-            error: function(response, status, error){
-                alert(response)
-                window.location.reload()
-            }
-        });
-    })
-}
 
 function isNumber(evt){
     var charCode = (evt.which) ? evt.which : evt.keyCode;
