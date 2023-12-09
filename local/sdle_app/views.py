@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.template.loader import render_to_string
 import random
 from .models import List, ItemOp
-from .connectUtils import queryProxy, getList, putList, itemOpsFormat, setProxy as setProxyUtil, getProxy
+from .connectUtils import queryProxy, getList, putList, itemOpsFormat, setProxy as setProxyUtil, getProxy, setOnlineFlag
 # Create your views here.
 
 ADDRESS = ""
@@ -154,3 +154,17 @@ def poll(request, hash):
     print(itemList)
     html = render_to_string('listPage/listItems.html', {'items':itemList})
     return JsonResponse({"html_content": html, "itemList":itemList}, status=200)
+
+def onlineCheck(request):
+    if(request.method != 'POST'):
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    
+    isChecked = request.POST['isChecked']
+    
+    if isChecked == 'true':
+        setOnlineFlag(True)
+        return JsonResponse({"msg": "Online flag set"}, status=200)
+    
+    setOnlineFlag(False)
+    
+    return JsonResponse({"msg": "Online flag unset"}, status=200)

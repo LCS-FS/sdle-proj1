@@ -3,8 +3,11 @@ import requests
 from .models import List, ItemOp
 
 PROXY = "http://localhost:12345"
+ONLINE_FLAG = True
 
 def queryProxy(listHash):
+    if not ONLINE_FLAG:
+        return None, None
     try:
         r = requests.get(PROXY + "/list/" + listHash, timeout=5)
         print(r.status_code)
@@ -24,7 +27,14 @@ def queryProxy(listHash):
         print("Error:", r.status_code)
         return None, None
 
+def setOnlineFlag(flag):
+    global ONLINE_FLAG
+    ONLINE_FLAG = flag
+    return
+
 def getList(address, port, listHash, count=0):
+    if not ONLINE_FLAG:
+        return False
     try:
         r = requests.get("http://" + address + ":" + str(port) + "/list/" + listHash, timeout=5)
         print(f"getList: {r.status_code}")
@@ -73,7 +83,9 @@ def getList(address, port, listHash, count=0):
         return False
 
 
-def putList(address, port, listHash, name, items):    
+def putList(address, port, listHash, name, items):
+    if not ONLINE_FLAG:
+        return False
     itemList = []
     for item in items:
         if item.type == 'Add':

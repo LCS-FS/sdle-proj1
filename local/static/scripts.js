@@ -1,10 +1,13 @@
 url = window.location.href;
+var isChecked = true;
+
 if(url.includes("list")){
     arrows()
     $(document).ready(function(){
         // Periodically call the updatePage function (e.g., every 5 seconds)
         setInterval(updatePage, 5000);
     });
+    $("#onlineCheck").change(handleCheckboxChange);
 }else{
     window.addEventListener( "pageshow", function ( event ) {
         var historyTraversal = event.persisted || 
@@ -17,7 +20,31 @@ if(url.includes("list")){
       });
 }
 
+function handleCheckboxChange() {
+    // Check if the checkbox is checked or unchecked
+    isChecked = $("#onlineCheck").prop("checked");
+    console.log("Checkbox is checked:", isChecked);
+
+    // AJAX request
+    $.ajax({
+      url: "/onlineCheck", // Replace with your actual backend endpoint
+      type: "POST", // Adjust the HTTP method as needed
+      data: { "isChecked": isChecked }, // Send checkbox state to the server if needed
+      headers:{
+        'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()
+      },
+      success: function(response) {
+        // Handle success response from the server
+      },
+      error: function(error) {
+        // Handle error response from the server
+        console.error("AJAX request failed", error);
+      }
+    });
+  }
+
 function updatePage() {
+    if(!isChecked) return
     $.ajax({
         url: url+'/poll',  // URL of your Django view
         type: 'GET',
@@ -77,7 +104,6 @@ function arrows(){
 
             if(parseInt(element.value)===0){
                 const grandParent = element.parentNode.parentNode
-                console.log("remove: ", grandParent.parentNode.removeChild(grandParent))
             }
         })
     });
@@ -93,7 +119,6 @@ function isNumber(evt){
 }
 
 function copyHash(hash){
-    console.log(hash)
     navigator.clipboard.writeText(String(hash));
     const button = document.querySelector("#shareHash"+String(hash))
     button.innerHTML = 'Copied'
