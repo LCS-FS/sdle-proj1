@@ -58,8 +58,8 @@ def removeList(request, hash):
 def listPage(request, hash):
     global ADDRESS, PORT
     address, port = queryProxy(hash)
+    l = List.objects.get(hash=hash)
     if not (address == None or port == None):
-        l = List.objects.get(hash=hash)
         putList(address, port, l.hash, l.title, ItemOp.objects.all().filter(list=l))
         getList(address, port, hash)
         ADDRESS, PORT = address, port
