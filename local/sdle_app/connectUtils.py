@@ -83,7 +83,7 @@ def getList(address, port, listHash, count=0):
         return False
 
 
-def putList(address, port, listHash, name, items):
+def putList(address, port, listHash, name, items, count=0):
     if not ONLINE_FLAG:
         return False
     itemList = []
@@ -101,10 +101,15 @@ def putList(address, port, listHash, name, items):
     
     try:
         r = requests.put("http://" + address + ":" + str(port) + "/list", json={"id": listHash, "name": name, "commits": itemList}, timeout=5)
-        print(r.request.body)
-        print(r.text)
-    except:
-        return False
+        print(f"put body {r.request.body}")
+        print(f"put text {r.text}")
+    except Exception as e:
+        print(f"putList Exception: {e}")
+        adress, port = queryProxy(listHash)
+        if adress is None or port is None:
+            return False
+        elif count <3:
+            return putList(address, port, listHash, name, items, count=count+1)
     if r.status_code == 200:
         print("List updated.")
         return True

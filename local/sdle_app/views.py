@@ -147,6 +147,8 @@ def poll(request, hash):
     if(request.method != 'GET'):
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
     
+    if not putList(ADDRESS, PORT, hash, List.objects.get(hash=hash).title, ItemOp.objects.all().filter(list=List.objects.get(hash=hash))):
+        return JsonResponse({"error": "Error putting list"}, status=500)
     if not getList(ADDRESS, PORT, hash):
         return JsonResponse({"error": "Error getting list"}, status=500)
     
