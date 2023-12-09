@@ -7,7 +7,6 @@ if(url.includes("list")){
         // Periodically call the updatePage function (e.g., every 5 seconds)
         setInterval(() => {
             updatePage().catch(console.error);
-            console.log("updating")
         }, 5000);
     });
     $("#onlineCheck").change(handleCheckboxChange);
