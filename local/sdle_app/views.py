@@ -60,9 +60,9 @@ def listPage(request, hash):
     address, port = queryProxy(hash)
     l = List.objects.get(hash=hash)
     if not (address == None or port == None):
-        putList(address, port, l.hash, l.title, ItemOp.objects.all().filter(list=l))
-        getList(address, port, hash)
-        ADDRESS, PORT = address, port
+        if putList(address, port, l.hash, l.title, ItemOp.objects.all().filter(list=l)):
+            getList(address, port, hash)
+            ADDRESS, PORT = address, port
     
     itemList = itemOpsFormat(hash)
     
@@ -87,8 +87,8 @@ def newItem(request):
     l = List.objects.get(hash=listHash)
     items = ItemOp.objects.all().filter(list=l)
     
-    putList(ADDRESS, PORT, listHash, l.title, items)
-    getList(ADDRESS, PORT, listHash)
+    if putList(ADDRESS, PORT, listHash, l.title, items):
+        getList(ADDRESS, PORT, listHash)
 
     return redirect("listPage", listHash)
 
@@ -123,8 +123,8 @@ def updateItem(request, title):
     itemOp = ItemOp(list=l, hash=str(random.getrandbits(128)), title=title, type=opType, count=newCount)
     itemOp.save()
 
-    putList(ADDRESS, PORT, l.hash, l.title, ItemOp.objects.all().filter(list=l))
-    getList(ADDRESS, PORT, l.hash)
+    if putList(ADDRESS, PORT, l.hash, l.title, ItemOp.objects.all().filter(list=l)):
+        getList(ADDRESS, PORT, l.hash)
 
     return JsonResponse({}, status=200)
 
