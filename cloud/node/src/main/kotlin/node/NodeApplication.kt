@@ -6,9 +6,10 @@ import org.springframework.boot.runApplication
 import org.springframework.boot.web.server.ConfigurableWebServerFactory
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
 import org.springframework.context.annotation.Bean
+import java.net.InetAddress
 
-private const val ADDRESS: String = "localhost"
-private var       PORT:    Int    = (1024..65535).random()
+private val ADDRESS: String = InetAddress.getLocalHost().hostAddress
+private val PORT:    Int    = (1024..65535).random()
 
 private const val CONNECTION_TRIES:      Int = 3
 private const val CONNECTION_TIMEOUT_MS: Int = 3000

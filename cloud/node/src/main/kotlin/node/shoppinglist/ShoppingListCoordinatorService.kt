@@ -32,8 +32,6 @@ class ShoppingListCoordinatorService(override val db: JdbcTemplate) : ShoppingLi
     fun getListByIdCoordinator(id: String): ShoppingList? {
         updatePreferenceList()
 
-        println("Received get list $id")
-
         if (preferenceList.size < REQUIRED_READS) return null
 
         val coordinatorList = getListById(id)
@@ -64,8 +62,6 @@ class ShoppingListCoordinatorService(override val db: JdbcTemplate) : ShoppingLi
 
     fun putListCoordinator(shoppingList: ShoppingList) {
         updatePreferenceList()
-
-        println("Received put list: ${Json.encodeToString(shoppingList)}")
 
         putList(shoppingList)
 
