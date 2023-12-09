@@ -38,49 +38,50 @@ def getList(address, port, listHash, count=0):
     try:
         r = requests.get("http://" + address + ":" + str(port) + "/list/" + listHash, timeout=5)
         print(f"getList: {r.status_code}")
+    
+    
+        if r.status_code == 200:
+            response_data = r.json()
+            name = response_data.get("name")
+            items = response_data.get("commits")
+            
+            findList = List.objects.all().filter(hash=listHash)
+            
+            print(f"findList: {findList}")
+            if len(findList) == 0:    
+                l = List(hash=listHash, title=name)
+                l.save()
+            
+            if name and items:
+                print(name)
+                l = List.objects.get(hash=listHash)
+                
+                for item in items:
+                    if item['type'] == 'ADD':
+                        typ = 'Add'
+                    else:
+                        typ = 'Rem'
+                    itemOp = ItemOp(hash=item['hash'], title=item['itemName'], type=typ, count=item['count'], list=l)
+                    
+                    # if itemOp not in database, add
+                    try:
+                        itemFound = ItemOp.objects.get(itemOp)
+                    except:
+                        itemOp.save()
+                return True
+            else:
+                print("Name or items not found in the response.")
+                return False
+        else:
+            print("GetList Error:", r.status_code)
+            return False
     except Exception as e:
         print(f"getList Exception: {e}")
-        adress, port = queryProxy(listHash)
-        if adress is None or port is None:
+        address, port = queryProxy(listHash)
+        if address is None or port is None:
             return False
         elif count <3:
             return getList(address, port, listHash, count=count+1)
-    
-    if r.status_code == 200:
-        response_data = r.json()
-        name = response_data.get("name")
-        items = response_data.get("commits")
-        
-        findList = List.objects.all().filter(hash=listHash)
-        
-        print(f"findList: {findList}")
-        if len(findList) == 0:    
-            l = List(hash=listHash, title=name)
-            l.save()
-        
-        if name and items:
-            print(name)
-            l = List.objects.get(hash=listHash)
-            
-            for item in items:
-                if item['type'] == 'ADD':
-                    typ = 'Add'
-                else:
-                    typ = 'Rem'
-                itemOp = ItemOp(hash=item['hash'], title=item['itemName'], type=typ, count=item['count'], list=l)
-                
-                # if itemOp not in database, add
-                try:
-                    itemFound = ItemOp.objects.get(itemOp)
-                except:
-                    itemOp.save()
-            return True
-        else:
-            print("Name or items not found in the response.")
-            return False
-    else:
-        print("GetList Error:", r.status_code)
-        return False
 
 
 def putList(address, port, listHash, name, items, count=0):
@@ -103,18 +104,22 @@ def putList(address, port, listHash, name, items, count=0):
         r = requests.put("http://" + address + ":" + str(port) + "/list", json={"id": listHash, "name": name, "commits": itemList}, timeout=5)
         print(f"put body {r.request.body}")
         print(f"put text {r.text}")
+        
+        if r.status_code == 200:
+            print("List updated.")
+            return True
+        
+        else:
+            print("Error:", r.status_code)
+            return False
     except Exception as e:
         print(f"putList Exception: {e}")
-        adress, port = queryProxy(listHash)
-        if adress is None or port is None:
+        address, port = queryProxy(listHash)
+        if address is None or port is None:
             return False
         elif count <3:
             return putList(address, port, listHash, name, items, count=count+1)
-    if r.status_code == 200:
-        print("List updated.")
-        return True
-    else:
-        print("Error:", r.status_code)
+    
 
 def itemOpsFormat(listHash):
     l = List.objects.get(hash=listHash)
