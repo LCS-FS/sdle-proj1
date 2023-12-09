@@ -24,14 +24,17 @@ def queryProxy(listHash):
         print("Error:", r.status_code)
         return None, None
 
-def getList(address, port, listHash):
+def getList(address, port, listHash, count=0):
     try:
         r = requests.get("http://" + address + ":" + str(port) + "/list/" + listHash, timeout=5)
         print(f"getList: {r.status_code}")
     except Exception as e:
         print(f"getList Exception: {e}")
-        return False
-    
+        adress, port = queryProxy(listHash)
+        if adress is None or port is None:
+            return False
+        elif count <3:
+            return getList(address, port, listHash, count=count+1)
     
     if r.status_code == 200:
         response_data = r.json()
