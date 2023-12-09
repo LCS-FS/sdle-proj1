@@ -76,7 +76,7 @@ function arrows(){
     arrows = document.querySelectorAll(".cnt")
     arrows.forEach(element => {
         element.addEventListener("keydown", isNumber)
-        element.addEventListener("input", function(){
+        element.addEventListener("input", async function(){
             if(element.value === "") return
 
             //send backend post request to have new op
@@ -85,28 +85,34 @@ function arrows(){
                 "count":element.value
             }
 
-            $.ajax({
-                data:JSON.stringify(formData),
-                type:"POST",
-                url:"/updateItem/"+element.id.split('_')[1],
-                
-                headers:{
-                    'X-CSRFToken': formData.csrfmiddlewaretoken
-                },
-
-                success: function (response) {},
-                
-                error: function(response, status, error){
-                    alert(response)
-                    window.location.reload()
-                }
-            });
+            await arrowAjax(element, formData)
 
             if(parseInt(element.value)===0){
                 const grandParent = element.parentNode.parentNode
             }
         })
     });
+}
+
+async function arrowAjax(element, formData){
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            data:JSON.stringify(formData),
+            type:"POST",
+            url:"/updateItem/"+element.id.split('_')[1],
+            
+            headers:{
+                'X-CSRFToken': formData.csrfmiddlewaretoken
+            },
+    
+            success: function (response) {},
+            
+            error: function(response, status, error){
+                alert(response)
+                window.location.reload()
+            }
+        });
+    })
 }
 
 function isNumber(evt){
