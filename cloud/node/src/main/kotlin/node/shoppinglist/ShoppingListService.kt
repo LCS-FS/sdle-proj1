@@ -35,23 +35,35 @@ class ShoppingListService(val db: JdbcTemplate) {
 
     fun putList(shoppingList: ShoppingList) {
         lock.lock()
+
+        val currentList = getListById(shoppingList.id)
+        val mergedList = if (currentList == null) shoppingList else mergeShoppingLists(listOf(shoppingList, currentList)) ?: return
+
         // delete old list representation
         db.update(
                 "DELETE FROM lists WHERE id = ?",
-                shoppingList.id
+                mergedList.id
         )
 
         // insert new list representation
         db.update(
                 "INSERT INTO lists VALUES (?, ?)",
-                shoppingList.id, shoppingList.name
+                mergedList.id, mergedList.name
         )
-        for (commit in shoppingList.commits) {
+        for (commit in mergedList.commits) {
             db.update(
                     "INSERT INTO commits(hash, name, quantity, sum, listId) VALUES (?, ?, ?, ?, ?)",
                     commit.hash, commit.itemName, commit.count, commit.type == ShoppingListCommitType.ADD, shoppingList.id
             )
         }
         lock.unlock()
+    }
+
+    protected fun mergeShoppingLists(shoppingLists: List<ShoppingList>): ShoppingList? {
+        if (shoppingLists.isEmpty()) return null
+
+        val commitsSet = mutableSetOf<ShoppingListCommit>()
+        commitsSet.addAll(shoppingLists.map { it.commits }.flatten())
+        return ShoppingList(shoppingLists.first().id, shoppingLists.first().name, commitsSet.toList())
     }
 }
